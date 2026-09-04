@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#172033">
+  <meta name="description" content="수능 만점을 향해 관측하고 배정하고 보정하는 개인 학습 운영체계, 曆象.">
+  <title>曆象 · 수능 만점 운영체계</title>
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="icon" href="./icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="./icon-192.png">
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <a class="skip-link" href="#mainContent">본문으로 건너뛰기</a>
+  <div id="bootScreen" class="boot-screen" aria-live="polite">
+    <div class="boot-seal">曆象</div>
+    <p>기록을 읽고 시간의 위치를 계산하는 중</p>
+  </div>
+
+  <div id="appShell" class="app-shell" hidden>
+    <aside class="rail" aria-label="주 메뉴">
+      <div class="brand-block">
+        <div class="brand-seal" aria-hidden="true">曆象</div>
+        <div>
+          <strong>曆象</strong>
+          <span>수능 만점 운영체계</span>
+        </div>
+      </div>
+
+      <nav class="rail-nav">
+        <button class="nav-item is-active" data-route="today"><b>今</b><span>오늘</span></button>
+        <button class="nav-item" data-route="exams"><b>觀</b><span>시험</span></button>
+        <button class="nav-item" data-route="weakness"><b>正</b><span>약점</span></button>
+        <button class="nav-item" data-route="curriculum"><b>授</b><span>과정</span></button>
+        <button class="nav-item" data-route="calendar"><b>曆</b><span>시간</span></button>
+        <button class="nav-item" data-route="year"><b>成</b><span>종합</span></button>
+        <button class="nav-item" data-route="data"><b>記</b><span>데이터</span></button>
+      </nav>
+
+      <blockquote class="rail-quote">
+        <p>曆象日月星辰<br>敬授人時</p>
+        <cite>《尚書·堯典》</cite>
+      </blockquote>
+
+      <div class="rail-status">
+        <span class="status-dot" id="storageDot"></span>
+        <span id="storageLabel">기기 저장 확인 중</span>
+      </div>
+    </aside>
+
+    <main id="mainContent" class="main-content" tabindex="-1">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow" id="routeKicker">今日 · 지금 해야 할 일</p>
+          <h1 id="routeTitle">오늘</h1>
+        </div>
+        <div class="topbar-actions">
+          <label class="date-control" for="globalDate">
+            <span>관측일</span>
+            <input type="date" id="globalDate" value="2026-09-04">
+          </label>
+          <button class="icon-button" id="quickBackup" type="button" title="현재 데이터 백업" aria-label="현재 데이터 백업">↓</button>
+        </div>
+      </header>
+
+      <section id="missionTrack" class="mission-track" aria-label="목표 시계"></section>
+      <div id="backupWarning" class="notice notice-warning" hidden></div>
+      <section id="screen" class="screen" aria-live="polite"></section>
+      <footer class="app-footer">
+        <span>曆象 v1.0.0</span>
+        <span>관측 · 배정 · 보정 · 완성</span>
+      </footer>
+    </main>
+
+    <nav class="bottom-nav" aria-label="모바일 주 메뉴">
+      <button class="nav-item is-active" data-route="today"><b>今</b><span>오늘</span></button>
+      <button class="nav-item" data-route="exams"><b>觀</b><span>시험</span></button>
+      <button class="nav-item" data-route="weakness"><b>正</b><span>약점</span></button>
+      <button class="nav-item" data-route="curriculum"><b>授</b><span>과정</span></button>
+      <button class="nav-more" id="moreNav" type="button"><b>···</b><span>더보기</span></button>
+    </nav>
+
+    <div class="more-menu" id="moreMenu" hidden>
+      <button data-route="calendar"><b>曆</b> 시간</button>
+      <button data-route="year"><b>成</b> 종합</button>
+      <button data-route="data"><b>記</b> 데이터</button>
+    </div>
+  </div>
+
+  <dialog id="appDialog" class="app-dialog">
+    <form method="dialog" class="dialog-shell">
+      <header class="dialog-header">
+        <div>
+          <p class="eyebrow" id="dialogKicker">기록</p>
+          <h2 id="dialogTitle">입력</h2>
+        </div>
+        <button class="icon-button" id="dialogClose" type="button" aria-label="닫기">×</button>
+      </header>
+      <div id="dialogBody" class="dialog-body"></div>
+    </form>
+  </dialog>
+
+  <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+
+  <noscript>이 앱은 기기 안에서 기록을 계산하기 위해 JavaScript가 필요합니다.</noscript>
+  <script src="./initial-state.js"></script>
+  <script src="./core.js"></script>
+  <script src="./storage.js"></script>
+  <script src="./charts.js"></script>
+  <script src="./app.js"></script>
+</body>
+</html>
