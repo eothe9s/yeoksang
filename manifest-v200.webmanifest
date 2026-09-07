@@ -1,0 +1,14 @@
+{
+  "name": "曆象 · 수능 만점 운영체제",
+  "short_name": "曆象",
+  "description": "수능 만점을 위한 실행·분석·재계획 운영체제",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#F4F6FA",
+  "theme_color": "#EEF2F7",
+  "icons": [
+    {"src":"./icon-192.png","sizes":"192x192","type":"image/png","purpose":"any maskable"},
+    {"src":"./icon-512.png","sizes":"512x512","type":"image/png","purpose":"any maskable"}
+  ]
+}
