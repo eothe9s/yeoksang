@@ -1,0 +1,1 @@
+GitHub Pages 저장소 최상단에 이 ZIP의 파일을 그대로 업로드하세요. 기존 사이트와 같은 origin이면 기존 localStorage 데이터가 이어집니다. 먼저 JSON 백업을 권장합니다.

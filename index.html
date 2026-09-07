@@ -1,113 +1,613 @@
 <!doctype html>
 <html lang="ko">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#172033">
-  <meta name="description" content="수능 만점을 향해 관측하고 배정하고 보정하는 개인 학습 운영체계, 曆象.">
-  <title>曆象 · 수능 만점 운영체계</title>
-  <link rel="manifest" href="./manifest.webmanifest">
-  <link rel="icon" href="./icon.svg" type="image/svg+xml">
-  <link rel="apple-touch-icon" href="./icon-192.png">
-  <link rel="stylesheet" href="./styles.css">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="theme-color" content="#f7f8fb">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="曆象">
+<link rel="manifest" href="./manifest-v90.webmanifest?v=900">
+<link rel="apple-touch-icon" href="./icon-192.png">
+<link rel="stylesheet" href="./styles-v90.css?v=900">
+<title>曆象 · PROJECT 11122</title>
 </head>
 <body>
-  <a class="skip-link" href="#mainContent">본문으로 건너뛰기</a>
-  <div id="bootScreen" class="boot-screen" aria-live="polite">
-    <div class="boot-seal">曆象</div>
-    <p>기록을 읽고 시간의 위치를 계산하는 중</p>
-  </div>
-
-  <div id="appShell" class="app-shell" hidden>
-    <aside class="rail" aria-label="주 메뉴">
-      <div class="brand-block">
-        <div class="brand-seal" aria-hidden="true">曆象</div>
-        <div>
-          <strong>曆象</strong>
-          <span>수능 만점 운영체계</span>
-        </div>
-      </div>
-
-      <nav class="rail-nav">
-        <button class="nav-item is-active" data-route="today"><b>今</b><span>오늘</span></button>
-        <button class="nav-item" data-route="exams"><b>觀</b><span>시험</span></button>
-        <button class="nav-item" data-route="weakness"><b>正</b><span>약점</span></button>
-        <button class="nav-item" data-route="curriculum"><b>授</b><span>과정</span></button>
-        <button class="nav-item" data-route="calendar"><b>曆</b><span>시간</span></button>
-        <button class="nav-item" data-route="year"><b>成</b><span>종합</span></button>
-        <button class="nav-item" data-route="data"><b>記</b><span>데이터</span></button>
-      </nav>
-
-      <blockquote class="rail-quote">
-        <p>曆象日月星辰<br>敬授人時</p>
-        <cite>《尚書·堯典》</cite>
-      </blockquote>
-
-      <div class="rail-status">
-        <span class="status-dot" id="storageDot"></span>
-        <span id="storageLabel">기기 저장 확인 중</span>
-      </div>
-    </aside>
-
-    <main id="mainContent" class="main-content" tabindex="-1">
-      <header class="topbar">
-        <div>
-          <p class="eyebrow" id="routeKicker">今日 · 지금 해야 할 일</p>
-          <h1 id="routeTitle">오늘</h1>
-        </div>
-        <div class="topbar-actions">
-          <label class="date-control" for="globalDate">
-            <span>관측일</span>
-            <input type="date" id="globalDate" value="2026-09-04">
-          </label>
-          <button class="icon-button" id="quickBackup" type="button" title="현재 데이터 백업" aria-label="현재 데이터 백업">↓</button>
-        </div>
-      </header>
-
-      <section id="missionTrack" class="mission-track" aria-label="목표 시계"></section>
-      <div id="backupWarning" class="notice notice-warning" hidden></div>
-      <section id="screen" class="screen" aria-live="polite"></section>
-      <footer class="app-footer">
-        <span>曆象 v1.0.0</span>
-        <span>관측 · 배정 · 보정 · 완성</span>
-      </footer>
-    </main>
-
-    <nav class="bottom-nav" aria-label="모바일 주 메뉴">
-      <button class="nav-item is-active" data-route="today"><b>今</b><span>오늘</span></button>
-      <button class="nav-item" data-route="exams"><b>觀</b><span>시험</span></button>
-      <button class="nav-item" data-route="weakness"><b>正</b><span>약점</span></button>
-      <button class="nav-item" data-route="curriculum"><b>授</b><span>과정</span></button>
-      <button class="nav-more" id="moreNav" type="button"><b>···</b><span>더보기</span></button>
+<div id="updateBanner" class="update-banner hidden"><span>새 버전이 준비되었습니다.</span><button id="reloadUpdate" class="btn primary small">새로고침</button></div>
+<div class="app-shell">
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-mark">曆象</div>
+      <div><h1>PROJECT 11122</h1><p>수능 만점 운영체제</p><span>v9.0 · EXECUTION × INTELLIGENCE</span></div>
+    </div>
+    <nav id="mainNav" aria-label="주 메뉴">
+      <button class="active" data-page="dashboard">오늘</button>
+      <button data-page="planner">계획</button>
+      <button data-page="vending">학습</button>
+      <button data-page="tests">시험</button>
+      <button data-page="analysis">분석</button>
     </nav>
+    <button id="settingsGear" class="settings-gear" title="설정·백업" aria-label="설정·백업">⚙︎</button>
+  </aside>
 
-    <div class="more-menu" id="moreMenu" hidden>
-      <button data-route="calendar"><b>曆</b> 시간</button>
-      <button data-route="year"><b>成</b> 종합</button>
-      <button data-route="data"><b>記</b> 데이터</button>
+  <main class="main">
+    <header class="topbar">
+      <div>
+        <h2 id="pageTitle">오늘</h2>
+        <div id="topDate" class="top-date"></div>
+      </div>
+      <div class="top-actions">
+        <button id="nowModeBtn" class="btn primary">지금 할 것</button>
+        <button id="closeDayBtn" class="btn ghost">오늘 마감</button>
+      </div>
+    </header>
+
+    <!-- TODAY -->
+    <section id="dashboard" class="page active">
+      <div class="today-headline">
+        <div><span id="stageLabel" class="eyebrow">현재 단계</span><h3 id="stageTitle">수능 최종 대비</h3><p id="stageDesc">목표 11111</p></div>
+        <div class="deadline-strip">
+          <div><span>1차 학습 폐쇄</span><b id="ddayClose">D-</b><small>10.16</small></div>
+          <div><span>10월 학평</span><b id="ddayOct">D-</b><small>10.20 · 전과목 1등급</small></div>
+          <div><span>수능</span><b id="ddayCsat">D-</b><small>11.19 · 만점</small></div>
+          <span id="dday9" class="hidden"></span>
+        </div>
+      </div>
+
+      <article class="execution-hero">
+        <div class="hero-head"><div><span class="eyebrow">오늘의 실행</span><h3>지금 정확하게 할 것만 남긴다.</h3></div><span id="planLockBadge" class="badge">계획 열림</span></div>
+        <div class="hero-metrics">
+          <div class="hero-metric primary"><span>지금 할 것</span><b id="focusNowTask">아직 없음</b><small id="focusCurrentBlock">현재 블록 없음</small></div>
+          <div class="hero-metric"><span>오늘 최소 필요량</span><b id="todayNeedHours">분량 미정</b><small id="todayNeedCaption">10월 16일까지 남은 분량 기준</small></div>
+          <div class="hero-metric"><span>오늘 완주</span><b id="focusTaskCount">0/0</b><small id="todayCompletionCaption">필수와 전체를 분리해 기록</small></div>
+        </div>
+        <div class="hero-subline"><span>남은 계획 자습 <b id="focusRemainStudy">0분</b></span><span id="sleepGuardMini">수면 규칙 확인 중</span></div>
+        <div id="overloadBanner" class="banner hidden"></div><div id="automationConflictBanner" class="banner warn hidden"></div>
+      </article>
+
+      <article id="sleepGuardCard" class="sleep-guard-card">
+        <div><span class="eyebrow">불가침 규칙</span><b id="sleepGuardTitle">23:00 전 취침</b><p id="sleepGuardDetail">평일 06:30 전 기상 · 주말 기상 목표는 미정</p></div>
+        <div class="sleep-guard-actions"><span id="sleepGuardState" class="status-chip">기록 확인</span><button class="btn ghost small" data-go="condition">수면 기록</button></div>
+      </article>
+
+      <div class="today-workspace">
+        <article class="workspace-panel tasks-panel">
+          <div class="card-head"><div><h3>오늘 할 일</h3><div class="micro-label">약속한 분량은 오늘의 기록으로 남습니다.</div></div><div class="row"><select id="taskSortMode" class="input task-sort-select" aria-label="오늘 할 일 정렬"><option value="timeline">시간순</option><option value="subject">과목순</option></select><button id="addTaskBtn" class="btn ghost small">+ 추가</button><button id="openWaitingBtn" class="btn ghost small">대기함</button></div></div>
+          <div id="todayTasks" class="task-list"></div>
+        </article>
+        <article class="workspace-panel schedule-panel">
+          <div class="card-head"><div><h3>오늘 시간표</h3><div class="micro-label">할 일 → 블록 → 지금 할 것</div></div><button id="togglePlanLock" class="btn ghost small">오늘 계획 확정</button></div>
+          <div id="todayScheduleList" class="compact-schedule"></div>
+          <div class="study-time-box clean"><div><span>계획 자습</span><b id="plannedStudyTime">0분</b></div><div><span>자동 실제</span><b id="autoStudyTime">0분</b></div><div><span>최종 순집중</span><b id="finalStudyTime">0분</b></div></div>
+          <div class="row"><input id="studyOverrideHours" class="input short" type="number" step="0.1" min="0" max="20" placeholder="수정 h"><button id="saveStudyOverride" class="btn primary small">순공 수정</button><button id="resetStudyOverride" class="btn ghost small">자동값</button></div>
+          <div id="unknownPeriodHint" class="muted"></div>
+        </article>
+      </div>
+
+      <article class="quota-panel"><div class="card-head"><div><h3>오늘 과목별 최소 배정</h3><div class="micro-label">남은 과정 시간의 비중만 계산합니다. 분량이 미정이면 억지로 추정하지 않습니다.</div></div><button class="btn ghost small" data-go="progress">분량·종료 기준</button></div><div id="dailyQuotaBySubject"></div></article>
+
+      <div class="grid g2 secondary-panels">
+        <article class="card"><div class="card-head"><h3>최근 7일 완주</h3><button class="btn ghost small" data-go="month">월간</button></div><div id="completionQuick" class="completion-list"></div></article>
+        <article class="card"><div class="card-head"><h3>최근 시험</h3><button class="btn ghost small" data-go="tests">시험</button></div><div id="testQuick" class="test-quick"></div><div class="subtle-divider"></div><div id="gapQuick" class="gap-list"></div></article>
+      </div>
+    </section>
+
+    <!-- MONTH -->
+    <section id="month" class="page">
+      <article class="card">
+        <div class="card-head">
+          <div><h3>월간</h3><div class="micro-label">달성률 · 순공</div></div>
+          <div class="row">
+            <button id="prevMonth" class="btn ghost small">‹</button>
+            <input id="monthPicker" class="input month-input" type="month">
+            <button id="nextMonth" class="btn ghost small">›</button>
+          </div>
+        </div>
+        <div id="monthStats" class="mini-stat-grid"></div>
+        <div class="calendar-weekdays"><span>일</span><span>월</span><span>화</span><span>수</span><span>목</span><span>금</span><span>토</span></div>
+        <div id="monthCalendar" class="month-calendar"></div>
+      </article>
+    </section>
+
+    <!-- PLANNER -->
+    <section id="planner" class="page">
+      <article class="card">
+        <div class="card-head">
+          <div><h3>텐미닛 시간표</h3><div class="micro-label">05:00–01:00 · 10분 · 수면 경계 우선</div><div class="section-links"><button class="text-link" data-go="month">월간</button><button class="text-link" data-go="week">주간</button><button class="text-link" data-go="progress">진도</button></div></div>
+          <div class="row">
+            <input id="plannerDate" class="input short" type="date">
+            <button id="plannerModeBtn" class="btn ghost small">편집 모드</button>
+          </div>
+        </div>
+        <div class="schedule-profile-bar">
+          <div class="schedule-profile-main"><span class="micro-label">이 날짜 시간표</span><select id="scheduleModeSelect" class="input"><option value="default">평일 기본</option><option value="saturday">토요일 시종</option><option value="off">학교 없음</option></select><button id="applyScheduleMode" class="btn primary small">적용</button><span id="scheduleModeBadge" class="badge">평일 기본</span></div>
+          <div class="row wrap"><button id="restoreScheduleBlocks" class="btn ghost small" disabled>삭제 블록 복원</button><button id="openScheduleTemplates" class="btn ghost small">저장 시간표</button></div>
+        </div>
+        <div id="plannerStats" class="mini-stat-grid"></div>
+        <div class="planner-board">
+          <div class="planner-main">
+            <div id="unknownRegularStrip" class="unknown-regular-strip"></div>
+            <div class="planner-toolbar">
+              <span id="plannerModeHint" class="muted">보기 모드</span>
+              <div class="row wrap">
+                <button id="sleepModeBtn" class="btn ghost small">☽ 취침</button>
+                <button id="addGridBlockBtn" class="btn primary small">10분 격자로 추가</button>
+                <button id="addDirectBlockBtn" class="btn ghost small">시간 직접 입력</button>
+              </div>
+            </div>
+            <div id="tenMinutePlanner" class="ten-planner"></div>
+            <div id="plannerLegend" class="subject-legend"></div>
+          </div>
+          <aside class="planner-side">
+            <article class="planner-side-card">
+              <h4>오늘</h4>
+              <div id="plannerQuickPanel"></div>
+            </article>
+          </aside>
+        </div>
+      </article>
+    </section>
+
+    <!-- WEEK -->
+    <section id="week" class="page">
+      <article class="card week-card">
+        <div class="card-head">
+          <div><h3>월~금 전체 시간표</h3><div class="micro-label">고정 일정 · 자습 · 프로그램</div></div>
+          <div class="row">
+            <button id="prevWeek" class="btn ghost small">‹</button>
+            <span id="weekRange" class="badge"></span>
+            <button id="nextWeek" class="btn ghost small">›</button>
+            <button id="thisWeek" class="btn ghost small">이번 주</button>
+          </div>
+        </div>
+        <div id="weekSchedule" class="week-schedule-wrap"></div>
+        <div class="micro-label week-note">칸을 누르면 해당 날짜의 텐미닛 시간표로 이동합니다. 전자기기 가능 자습만 ⌨︎ 표시.</div>
+      </article>
+    </section>
+
+    <!-- VENDING -->
+    <section id="vending" class="page">
+      <div class="learning-tabs">
+        <button class="learning-tab active" data-vtab="all">전체</button>
+        <button class="learning-tab" data-vtab="lecture">인강</button>
+        <button class="learning-tab" data-vtab="book">문제집</button>
+      </div>
+      <div class="vending-layout">
+        <div>
+          <article class="card">
+            <div class="card-head">
+              <div><h3>학습 자판기</h3><div class="micro-label">인강 · 문제집 · 장바구니 · 진도 연동</div><div class="section-links"><button class="text-link" data-go="progress">진도·종료기준</button><button class="text-link" id="openWaitingInline">대기함</button></div></div>
+              <div class="row"><button id="addLectureBtn" class="btn ghost small">+ 인강</button><button id="addBookBtn" class="btn primary small">+ 문제집</button></div>
+            </div>
+            <input id="learningSearch" class="input" placeholder="강좌·교재·소단원 검색">
+            <div id="recentLearning" class="recent-learning"></div>
+          </article>
+          <article id="lecturePanel" class="card">
+            <div class="card-head"><h3>인강</h3><label class="inline"><input id="incompleteOnly" type="checkbox"> 미수강만 보기</label></div>
+            <div id="lectureCatalog" class="lecture-catalog"></div>
+          </article>
+          <article id="bookPanel" class="card">
+            <div class="card-head"><h3>문제집</h3><span class="badge">문제 수 / 소단원</span></div>
+            <div id="bookCatalog" class="book-catalog"></div>
+          </article>
+        </div>
+        <aside class="card cart-card">
+          <div class="card-head"><h3>학습 장바구니</h3><span id="cartCount" class="badge">0개</span></div>
+          <label>일정 날짜<input id="cartDate" class="input" type="date"></label>
+          <div id="cartList" class="cart-list"></div>
+          <div id="cartHint" class="muted"></div>
+          <div class="stack">
+            <button id="buildCartPlan" class="btn primary">오늘 할 일로 만들기</button>
+            <button id="clearCart" class="btn ghost">장바구니 비우기</button>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <!-- AUTOMATION -->
+    <section id="automation" class="page">
+      <article class="card">
+        <div class="card-head">
+          <div><h3>반복 자동화</h3><div class="micro-label">요일 반복 · 할 일 생성</div></div>
+          <button id="addAutomationBtn" class="btn primary small">+ 반복 규칙</button>
+        </div>
+        <div id="automationList"></div>
+      </article>
+      <article class="card">
+        <div class="card-head"><h3>미완료 충돌</h3><span id="conflictCount" class="badge">0건</span></div>
+        <div id="conflictList"></div>
+      </article>
+    </section>
+
+    <!-- PROGRESS -->
+    <section id="progress" class="page">
+      <article class="card pressure-card">
+        <div class="card-head"><div><h3>10월 16일까지 남은 과정</h3><div class="micro-label">가능 시간과 필요한 시간을 분리합니다.</div></div><button class="btn ghost small" data-go="vending">학습 자판기</button></div>
+        <div id="curriculumPressure" class="pressure-summary"></div>
+      </article>
+      <article class="card">
+        <div class="card-head"><div><h3>과정 종료 기준</h3><div class="micro-label">완강과 시험에서 쓸 수 있음을 분리</div></div><span class="badge">수강 · 복습 · 적용 · 시간 내 재현</span></div>
+        <div id="progressCatalog"></div>
+      </article>
+    </section>
+
+    <!-- TESTS -->
+    <section id="tests" class="page">
+      <article class="card">
+        <div class="card-head"><div><h3>전과목 현재 상태</h3><div class="micro-label">대표 시험 우선 · 원점수 · 등급 · 시간 안정성 · 반복 오답</div></div><button id="addTestBtn" class="btn primary small">+ 시험</button></div>
+        <div id="testSubjectBoard" class="test-subject-board"></div>
+        <div id="testAllSubjectSummary" class="test-overview-summary"></div>
+      </article>
+
+      <div class="grid g2 test-brain-grid">
+        <article class="card"><div class="card-head"><div><h3>실전 안정성</h3><div class="micro-label">평균보다 최저점·변동폭·실패 방식</div></div></div><div id="stabilityBoard"></div></article>
+        <article class="card"><div class="card-head"><div><h3>과목별 시험 규칙</h3><div class="micro-label">시험장에서 기억할 것은 과목당 최대 3개</div></div><button id="editProtocolBtn" class="btn ghost small">규칙 편집</button></div><div id="protocolBoard"></div></article>
+      </div>
+
+      <article class="card score-analysis-card">
+        <div class="card-head score-analysis-head"><div><h3 id="scoreAnalysisTitle">성적 분석</h3><div id="scoreAnalysisCaption" class="micro-label">전범위 시험부터 비교합니다.</div></div><div class="row test-filters analysis-filters"><select id="analysisSubjectFilter" class="input"><option value="all">전과목</option><option>국어</option><option>수학</option><option>영어</option><option>사회문화</option><option>경제</option></select><select id="analysisSourceFilter" class="input"><option value="all">전체 출처</option><option value="평가원 모의평가">평가원 모의평가</option><option value="교육청 학력평가">교육청 학력평가</option><option value="사설 모의고사">사설 모의고사</option><option value="학교 모의고사">학교 모의고사</option><option value="수능">수능</option><option value="단원·과목 실모">단원·과목 실모</option></select><select id="analysisScopeFilter" class="input"><option value="representative">대표 시험 우선</option><option value="full">전범위만</option><option value="all">전체 범위</option></select></div></div>
+        <div id="scoreAnalysisEmpty" class="muted"></div>
+        <div id="scoreAnalysisContent" class="score-analysis-content hidden">
+          <div class="score-analysis-grid">
+            <section class="score-chart-panel"><div class="panel-head"><div><h3>원점수 추이</h3><div class="micro-label">같은 범주 시험끼리 비교</div></div><span id="scoreRangeLabel" class="badge"></span></div><svg id="rawScoreChart" class="raw-score-chart" role="img" aria-label="원점수 추이"></svg><div id="gradeTrend" class="grade-trend"></div></section>
+            <section class="score-insight-panel"><div class="panel-head"><div><h3>지금의 판단</h3><div class="micro-label">그래프를 할 일로 바꿉니다.</div></div></div><div id="scoreInsight"></div></section>
+          </div>
+          <div class="score-analysis-grid lower">
+            <section class="question-heat-panel"><div class="panel-head"><div><h3>반복 오답 문항</h3><div class="micro-label">3회 이상 비교 가능한 기록이 쌓인 경우에만 판정합니다.</div></div></div><div id="questionNumberGrid" class="question-number-grid"></div><div id="questionHeatLegend" class="micro-label"></div></section>
+            <section class="question-detail-panel"><div class="panel-head"><div><h3>문항·재풀이</h3><div class="micro-label">문항 번호를 누르면 연결된 기록을 봅니다.</div></div></div><div id="questionInsight"></div><div id="reviewQueue" class="review-queue"></div></section>
+          </div>
+        </div>
+      </article>
+
+      <div class="grid g2">
+        <article class="card">
+          <div class="card-head"><div><h3>시험 기록</h3><div class="micro-label">점수만 남기지 말고 문항 번호까지 빠르게 입력하세요.</div></div></div>
+          <div class="row test-filters"><select id="testSourceFilter" class="input"><option value="all">전체 유형</option><option value="평가원 모의평가">평가원 모의평가 (모평)</option><option value="교육청 학력평가">교육청 학력평가 (학평)</option><option value="수능">수능</option><option value="사설 모의고사">사설 모의고사</option><option value="학교 모의고사">학교 모의고사</option><option value="단원·과목 실모">단원·과목 실모</option><option value="기타">기타</option></select><select id="testScopeFilter" class="input"><option value="all">전체 범위</option><option value="full">전범위</option><option value="partial">부분 범위</option><option value="unit">단원·유형</option></select><select id="testSubjectFilter" class="input"><option value="all">전과목</option><option>국어</option><option>수학</option><option>영어</option><option>사회문화</option><option>경제</option></select></div>
+          <div id="testList"></div>
+        </article>
+        <article class="card">
+          <h3>반복 원인</h3>
+          <div id="errorCauseSummary"></div>
+          <h3 class="subhead">재풀이 대기</h3>
+          <div id="reviewQueueCompact"></div>
+          <h3 class="subhead">최근 등급</h3>
+          <div id="latestGradeSummary"></div>
+        </article>
+      </div>
+    </section>
+
+    <!-- GOALS -->
+    <section id="goals" class="page">
+      <div class="grid g2">
+        <article class="card checkpoint-card">
+          <span class="eyebrow">중간 체크포인트</span>
+          <h3>9월 모의평가</h3>
+          <div class="checkpoint-date">2026.09.02</div>
+          <div class="grade-goals"><b>국1</b><b>수1</b><b>영1</b><b>사2</b><b>경2</b></div>
+        </article>
+        <article class="card checkpoint-card final">
+          <span class="eyebrow">최종 목표</span>
+          <h3>2027학년도 수능</h3>
+          <div class="checkpoint-date">2026.11.19</div>
+          <div class="grade-goals"><b>국1</b><b>수1</b><b>영1</b><b>사1</b><b>경1</b></div>
+        </article>
+      </div>
+      <article class="card">
+        <div class="card-head"><h3>현재 단계 진단</h3><span id="goalStageBadge" class="badge"></span></div>
+        <div id="gradeForecast"></div>
+      </article>
+      <article class="card">
+        <div class="card-head"><h3>진도 압력</h3><span id="finishPressureBadge" class="badge"></span></div>
+        <div id="finishForecast"></div>
+      </article>
+      <article class="card">
+        <h3>9모 → 수능 로드맵</h3>
+        <div id="longRoadmap" class="roadmap"></div>
+      </article>
+      <article class="card">
+        <h3>최근 학습 공백</h3>
+        <div id="gapDetail" class="gap-list"></div>
+      </article>
+    </section>
+
+    <!-- CONDITION -->
+    <section id="condition" class="page">
+      <article class="card">
+        <div class="card-head"><div><h3>수면·컨디션</h3><div class="micro-label">평일 23:00 전 취침 · 06:30 전 기상 / 주말 기상 목표 미정</div></div><input id="conditionDate" class="input short" type="date"></div><div id="conditionGuardSummary" class="guard-summary"></div>
+        <div class="form-grid">
+          <label>전날 밤 취침<input id="bedTime" class="input" type="time"></label>
+          <label>오늘 기상<input id="wakeTime" class="input" type="time"></label>
+          <label>총 수면<input id="sleepTotal" class="input" readonly></label>
+          <label>수면 만족도<select id="sleepQuality" class="input"><option value="">선택</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></select></label>
+          <label>아침 피로<select id="fatigue" class="input"><option value="">선택</option><option>0</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></select></label>
+          <label>두통<select id="headache" class="input"><option value="">선택</option><option value="0">없음</option><option value="1">약함</option><option value="2">보통</option><option value="3">심함</option></select></label>
+          <label>집중<select id="focusScore" class="input"><option value="">선택</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></select></label>
+          <label>오늘 예상 컨디션<select id="expectedCondition" class="input"><option value="">선택</option><option>좋음</option><option>보통</option><option>낮음</option></select></label>
+          <label>저녁 피로<select id="eveningFatigue" class="input"><option value="">선택</option><option>0</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></select></label>
+          <label>오늘 집중<select id="dailyFocus" class="input"><option value="">선택</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></select></label>
+          <label>전체 컨디션<select id="overallCondition" class="input"><option value="">선택</option><option>좋음</option><option>보통</option><option>낮음</option></select></label>
+          <label>카페인 잔수<input id="caffeineCups" class="input" type="number" min="0" max="10"></label>
+          <label>마지막 카페인<input id="lastCaffeine" class="input" type="time"></label><label>운동 시간(분)<input id="exerciseMinutes" class="input" type="number" min="0" max="300"></label><label>운동 강도<select id="exerciseIntensity" class="input"><option value="">선택</option><option>낮음</option><option>보통</option><option>높음</option></select></label><label>조급함<select id="urgencyScore" class="input"><option value="">선택</option><option>0</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></select></label>
+        </div>
+        <div class="symptom-picker">
+          <label><input class="symptomCheck" type="checkbox" value="어지러움">어지러움</label>
+          <label><input class="symptomCheck" type="checkbox" value="속 불편함">속 불편함</label>
+          <label><input class="symptomCheck" type="checkbox" value="감기 기운">감기 기운</label>
+          <label><input class="symptomCheck" type="checkbox" value="근육통">근육통</label>
+          <label><input class="symptomCheck" type="checkbox" value="생리통">생리통</label>
+        </div>
+        <details class="optional-details"><summary>선택 기록 · 비타민</summary><div class="vitamin-section">
+          <div class="vitamin-head"><b>비타민</b><div class="row"><input id="vitaminName" class="input vitamin-name" placeholder="종류/제품 추가"><button id="addVitaminBtn" class="btn ghost small" type="button">추가</button></div></div>
+          <div id="vitaminPicker" class="vitamin-picker"></div>
+        </div></details>
+        <label>메모<textarea id="conditionMemo" class="input" rows="4"></textarea></label>
+        <button id="saveCondition" class="btn primary">저장</button>
+      </article>
+      <article class="card">
+        <h3>수면·컨디션 분석</h3>
+        <div id="conditionAnalysis"></div>
+      </article>
+    </section>
+
+    <!-- ANALYSIS -->
+    <section id="analysis" class="page">
+      <div class="analysis-launcher"><button class="btn ghost small" data-go="month">월간 달력</button><button class="btn ghost small" data-go="week">주간 시간표</button><button class="btn ghost small" data-go="progress">과정 진도</button><button class="btn ghost small" data-go="condition">수면·컨디션</button><button class="btn ghost small" data-go="goals">목표·진단</button></div>
+      <article class="card weekly-command-card"><div class="card-head"><div><h3>주간 지휘</h3><div class="micro-label">사실을 정리하고 다음 주 판단은 직접 남깁니다.</div></div><span id="weekCommandLabel" class="badge"></span></div><div id="weeklyCommand"></div><div class="weekly-priorities"><label>다음 주 핵심 1<input id="weeklyPriority1" class="input" placeholder="가장 중요한 한 가지"></label><label>핵심 2<input id="weeklyPriority2" class="input"></label><label>핵심 3<input id="weeklyPriority3" class="input"></label><label>줄이거나 중단할 자료<input id="weeklyStop" class="input"></label><button id="saveWeeklyCommand" class="btn primary">주간 판단 저장</button></div></article>
+      <article class="card"><div class="card-head"><div><h3>과목별 만점 준비도</h3><div class="micro-label">가짜 백분율 대신 개념·적용·실행·안정의 증거를 따로 봅니다.</div></div></div><div id="readinessBoard"></div></article>
+      <div class="grid g2">
+        <article class="card"><div class="card-head"><h3>월간 분석</h3><input id="analysisMonth" class="input month-input" type="month"></div><div id="analysisStats" class="mini-stat-grid"></div><div id="subjectBalance"></div></article>
+        <article class="card"><h3>최근 7일</h3><div id="recent7Stats" class="mini-stat-grid"></div><h3 class="subhead">최근 학습 공백</h3><div id="analysisGap" class="gap-list"></div></article>
+      </div>
+      <article class="card"><div class="card-head"><div><h3>오류 패턴</h3><div class="micro-label">번호가 달라도 반복되는 행동을 묶어 봅니다.</div></div></div><div id="errorPatternBoard"></div></article>
+    </section>
+
+    <!-- HIKE -->
+    <section id="hike" class="page">
+      <article class="card">
+        <div class="card-head"><div><h3>일요일 회복</h3><div class="micro-label">무등산 · 9.3km</div></div><label class="inline"><input id="hikeEnabled" type="checkbox"> 이번 주 등산</label></div>
+        <div class="hike-grid">
+          <div><span>거리</span><b>9.3 km</b></div><div><span>예상</span><b>약 4시간 17분</b></div><div><span>난이도</span><b>중</b></div><div><span>회복 공부</span><b>가벼운 복습</b></div>
+        </div>
+        <div class="micro-label">회복 우선 · 컨디션 낮으면 코스 축소</div>
+      </article>
+    </section>
+
+    <!-- SETTINGS -->
+    <section id="settings" class="page">
+      <div class="settings-title"><span>⚙︎</span><div><h3>설정·백업</h3></div></div>
+      <div class="grid g2">
+        <article class="card">
+          <h3>백업·복원</h3>
+          <div class="row"><button id="exportData" class="btn primary">전체 기록 내보내기</button><label class="btn ghost file-btn">기록 불러오기<input id="importData" type="file" accept=".json,application/json" hidden></label></div>
+        </article>
+        <article class="card">
+          <h3>기본 설정</h3>
+          <label>하루 인강 계획 상한<input id="lectureDailyCap" class="input" type="number" min="1" max="12"></label>
+          <div class="settings-compact-grid">
+            <label>1차 학습 폐쇄<input id="curriculumDeadlineSetting" class="input" type="date"></label>
+            <label>평일 목표 순공(h)<input id="weekdayCapacitySetting" class="input" type="number" min="0" max="18" step="0.5"></label>
+            <label>주말 목표 순공(h)<input id="weekendCapacitySetting" class="input" type="number" min="0" max="18" step="0.5"></label>
+            <label>마지막 자습 종료 시각<input id="studyCutoffSetting" class="input" type="time"><span class="form-note">비우면 23:00 절대 경계만 적용</span></label>
+          </div>
+          <label class="inline"><input id="automationEnabledSetting" type="checkbox"> 기존 반복 자동화 사용 <span class="muted">기본 꺼짐</span></label>
+          <div class="micro-label">평일 취침 23:00 전 · 기상 06:30 전은 계획보다 우선합니다. 주말 기상 시각은 아직 고정하지 않습니다.</div>
+          <button id="saveSettings" class="btn primary">설정 저장</button>
+        </article>
+      </div>
+      <article class="card">
+        <div class="card-head"><div><h3>평일 1~7교시 시각</h3><div class="micro-label">교시 시각 → 격자·순공 반영</div></div><button id="clearPeriodTimes" class="btn ghost small">시각 비우기</button></div>
+        <div id="periodTimeSettings" class="period-settings"></div>
+        <button id="savePeriodTimes" class="btn primary">교시 시각 저장</button>
+      </article>
+      <div class="grid g2">
+        <article class="card">
+          <div class="card-head"><h3>데이터 검사</h3><button id="runDiagnostics" class="btn ghost small">검사 실행</button></div>
+          <div id="diagnosticResult" class="diagnostic-result"></div>
+        </article>
+        <article class="card">
+          <div class="card-head"><h3>휴지통</h3><span class="badge">7일 보관</span></div>
+          <div id="trashList"></div>
+        </article>
+      </div>
+      <article class="card">
+        <div class="card-head"><h3>최근 변경 되돌리기</h3><span class="badge">최대 5회</span></div>
+        <div id="undoList"></div>
+      </article>
+      <article class="card version-card">
+        <h3>버전</h3>
+        <div id="versionInfo"></div>
+      </article>
+    </section>
+
+    <footer>曆象 · PROJECT 11122 · HTML 9.0 · JS <span id="runtimeStatus">확인 중</span></footer>
+  </main>
+</div>
+
+<!-- TASK MODAL -->
+<div id="taskModal" class="modal-back"><div class="modal">
+  <h3 id="taskModalTitle">할 일</h3><input id="taskId" type="hidden">
+  <div class="grid g3">
+    <label>과목<select id="taskSubject" class="input"><option>국어</option><option>수학</option><option>영어</option><option>사회문화</option><option>경제</option><option>기타</option></select></label>
+    <label>우선순위<select id="taskPriority" class="input"><option value="must">필수</option><option value="should">권장</option><option value="extra">여유</option></select></label>
+    <label>예상 시간(분)<input id="taskMinutes" class="input" type="number" min="0"></label>
+  </div>
+  <label>할 일<input id="taskName" class="input"></label>
+  <label>자료<input id="taskMaterial" class="input"></label>
+  <label>메모<textarea id="taskNote" class="input" rows="3"></textarea></label>
+  <div class="row end"><button class="btn ghost modal-close">취소</button><button id="saveTask" class="btn primary">저장</button></div>
+</div></div>
+
+<!-- ASSIGN TASKS -->
+<div id="assignModal" class="modal-back"><div class="modal wide">
+  <div class="card-head"><div><h3>시간 블록에 할 일 선택</h3><div id="assignBlockLabel" class="muted"></div></div><span id="assignCount" class="badge">0개</span></div>
+  <input id="assignDate" type="hidden"><input id="assignBlockId" type="hidden">
+  <input id="assignSearch" class="input" placeholder="오늘 할 일 검색">
+  <div id="assignTaskList" class="assign-list"></div>
+  <div class="row end"><button id="clearAssignments" class="btn ghost">배정 해제</button><button class="btn ghost modal-close">취소</button><button id="saveAssignments" class="btn primary">선택 저장</button></div>
+</div></div>
+
+<!-- BLOCK MODAL -->
+<div id="blockModal" class="modal-back"><div class="modal">
+  <h3 id="blockModalTitle">시간 블록</h3><input id="blockId" type="hidden"><input id="blockDate" type="hidden">
+  <div class="grid g2">
+    <label>이름<input id="blockName" class="input"></label>
+    <label>종류<select id="blockType" class="input"><option value="self">자습</option><option value="class">수업</option><option value="meal">식사</option><option value="break">휴식</option><option value="travel">이동</option><option value="custom">기타</option></select></label>
+    <label>시작<input id="blockStart" class="input" type="time"></label>
+    <label>종료<input id="blockEnd" class="input" type="time"></label>
+    <label>실제 공부(분)<input id="blockActual" class="input" type="number" min="0" placeholder="자동"></label>
+  </div>
+  <div class="check-row">
+    <label><input id="blockSelfStudy" type="checkbox"> 자습</label>
+    <label><input id="blockDevice" type="checkbox"> 전자기기 가능</label>
+    <label><input id="blockLocked" type="checkbox"> 자동배치 잠금</label>
+  </div>
+  <div id="blockLinkedTasks" class="linked-tasks"></div>
+  <div class="row"><button id="chooseBlockTasks" class="btn ghost">할 일 선택</button></div>
+  <div class="row end"><button class="btn ghost modal-close">취소</button><button id="deleteBlock" class="btn danger">삭제</button><button id="saveBlock" class="btn primary">저장</button></div>
+</div></div>
+
+<!-- SCHEDULE TEMPLATE MODAL -->
+<div id="scheduleTemplateModal" class="modal-back"><div class="modal wide">
+  <div class="card-head"><div><h3>저장 시간표</h3><div class="micro-label"><span id="templateTargetDate"></span> · 현재 날짜 시간표를 이름 붙여 다시 사용</div></div><button id="saveCurrentTemplate" class="btn primary small">현재 시간표 저장</button></div>
+  <div id="scheduleTemplateList" class="schedule-template-list"></div>
+  <div class="micro-label">적용하면 해당 날짜의 시간표 구조만 바뀝니다. 할 일은 삭제되지 않고 기존 시간표 배정만 해제됩니다.</div>
+  <div class="row end"><button class="btn ghost modal-close">닫기</button></div>
+</div></div>
+
+<!-- SLEEP MODAL -->
+<div id="sleepModal" class="modal-back"><div class="modal">
+  <h3>취침/기상</h3>
+  <input id="sleepDate" type="hidden">
+  <div class="grid g2">
+    <label>☽ 오늘 밤 취침<input id="sleepBed" class="input" type="time"></label>
+    <label>☼︎ 다음 날 기상<input id="sleepWake" class="input" type="time"></label>
+  </div>
+  <div class="micro-label" id="sleepSummaryText">취침 · 기상</div>
+  <div class="row end"><button class="btn ghost modal-close">취소</button><button id="clearSleepPlan" class="btn ghost">지우기</button><button id="saveSleepPlan" class="btn primary">저장</button></div>
+</div></div>
+
+<!-- LECTURE MODAL -->
+<div id="lectureModal" class="modal-back"><div class="modal">
+  <h3>사용자 인강 추가</h3>
+  <label>과목<select id="lectureSubject" class="input"><option>국어</option><option>수학</option><option>영어</option><option>사회문화</option><option>경제</option><option>기타</option></select></label>
+  <label>강사<input id="lectureProvider" class="input"></label>
+  <label>강좌명<input id="lectureName" class="input"></label>
+  <label>전체 강의 수<input id="lectureTotal" class="input" type="number" min="1" max="300"></label><div class="grid g2"><label>1강 최소(분)<input id="lectureMinutesLow" class="input" type="number" min="0" step="5"></label><label>1강 최대(분)<input id="lectureMinutesHigh" class="input" type="number" min="0" step="5"></label></div><div id="newMaterialGuard" class="guard-summary">시간을 입력하면 10월 16일 계획에 미치는 영향을 계산합니다.</div>
+  <div class="row end"><button class="btn ghost modal-close">취소</button><button id="saveLecture" class="btn primary">추가</button></div>
+</div></div>
+
+<!-- BOOK MODAL -->
+<div id="bookModal" class="modal-back"><div class="modal">
+  <h3 id="bookModalTitle">문제집 등록</h3><input id="bookId" type="hidden">
+  <div class="grid g2"><label>과목<select id="bookSubject" class="input"><option>국어</option><option>수학</option><option>영어</option><option>사회문화</option><option>경제</option><option>기타</option></select></label><label>교재명<input id="bookName" class="input"></label></div>
+  <label>소단원 목록<textarea id="bookSubunits" class="input" rows="8" placeholder="한 줄에 하나씩. 예: 01&#10;02&#10;03"></textarea></label>
+  <div class="row end"><button class="btn ghost modal-close">취소</button><button id="saveBook" class="btn primary">저장</button></div>
+</div></div>
+
+<!-- BOOK PROBLEMS MODAL -->
+<div id="bookProblemsModal" class="modal-back"><div class="modal">
+  <h3>문제 수로 담기</h3><input id="problemBookId" type="hidden">
+  <label>소단원<select id="problemSubunit" class="input"></select></label>
+  <div class="grid g2"><label>시작 문제<input id="problemStart" class="input" type="number" min="1" value="1"></label><label>문제 수<input id="problemCount" class="input" type="number" min="1" value="10"></label></div>
+  <label>예상 시간(분)<input id="problemMinutes" class="input" type="number" min="5" value="30"></label>
+  <div class="row end"><button class="btn ghost modal-close">취소</button><button id="addProblemsToCart" class="btn primary">담기</button></div>
+</div></div>
+
+<!-- AUTOMATION MODAL -->
+<div id="automationModal" class="modal-back"><div class="modal">
+  <h3>반복 규칙</h3><input id="automationId" type="hidden">
+  <label>학습 항목<select id="automationSource" class="input"></select></label>
+  <div id="weekdayPicker" class="weekday-picker">
+    <label><input type="checkbox" value="1">월</label><label><input type="checkbox" value="2">화</label><label><input type="checkbox" value="3">수</label><label><input type="checkbox" value="4">목</label><label><input type="checkbox" value="5">금</label><label><input type="checkbox" value="6">토</label><label><input type="checkbox" value="0">일</label>
+  </div>
+  <div class="grid g2"><label>시작일<input id="automationStart" class="input" type="date"></label><label>종료일<input id="automationEnd" class="input" type="date"></label><label>우선순위<select id="automationPriority" class="input"><option value="must">필수</option><option value="should">권장</option><option value="extra">여유</option></select></label><label>예상 시간(분)<input id="automationMinutes" class="input" type="number" min="0"></label></div>
+  <label class="inline"><input id="automationEnabled" type="checkbox" checked> 활성화</label>
+  <div class="row end"><button class="btn ghost modal-close">취소</button><button id="saveAutomation" class="btn primary">저장</button></div>
+</div></div>
+
+<!-- WAITING MODAL -->
+<div id="waitingModal" class="modal-back"><div class="modal wide">
+  <div class="card-head"><h3>이번 주 대기함</h3><button id="addWaitingManual" class="btn ghost small">+ 직접 추가</button></div>
+  <div id="waitingList"></div>
+  <div class="row end"><button class="btn ghost modal-close">닫기</button></div>
+</div></div>
+
+<!-- TEST MODAL -->
+<div id="testModal" class="modal-back"><div class="modal wide">
+  <h3>시험 기록</h3>
+  <div class="grid g3">
+    <label>유형<select id="testKind" class="input"><option value="single">과목별 시험</option><option value="full">전과목 모의고사</option></select></label>
+    <label>시험 구분<select id="testSource" class="input"><option value="평가원 모의평가">평가원 모의평가 (모평)</option><option value="교육청 학력평가">교육청 학력평가 (학평)</option><option value="수능">수능</option><option value="사설 모의고사">사설 모의고사</option><option value="학교 모의고사">학교 모의고사</option><option value="단원·과목 실모">단원·과목 실모</option><option value="기타">기타</option></select></label>
+    <label>시험 범위<select id="testScope" class="input"><option value="full">전범위</option><option value="partial">부분 범위</option><option value="unit">단원·유형</option></select></label>
+    <label>날짜<input id="testDate" class="input" type="date"></label>
+    <label>시험명<input id="testName" class="input" placeholder="2026 9월 모의평가 / 사문 실모"></label>
+    <label>회차·시행<input id="testRound" class="input" placeholder="9월 / 3회 / 2025년"></label>
+  </div>
+  <div id="singleTestFields">
+    <div class="grid g3"><label>과목<select id="testSubject" class="input"><option>국어</option><option>수학</option><option>영어</option><option>사회문화</option><option>경제</option></select></label><label>원점수<input id="testScore" class="input" type="number" min="0"></label><label>등급<input id="testGrade" class="input" type="number" min="1" max="9"></label><label>오답 수<input id="testWrongCount" class="input" type="number" min="0"></label><label>소요시간(분)<input id="testMinutes" class="input" type="number" min="0"></label><label>틀린 문항 번호<input id="testWrongQuestions" class="input" placeholder="3, 7, 14"></label><label>애매하지만 맞은 번호<input id="testUncertainQuestions" class="input" placeholder="5, 18"></label><label>시간 없어 못 푼 번호<input id="testAbandonedQuestions" class="input" placeholder="19, 20"></label><label>종료 시 남은 시간(분)<input id="testTimeLeft" class="input" type="number" min="0"></label><label>첫 크게 막힌 문항<input id="testFirstChoke" class="input" type="number" min="1"></label><label>마지막 정상 풀이 문항<input id="testLastNormal" class="input" type="number" min="1"></label></div>
+  </div>
+  <div id="fullTestFields" class="hidden">
+    <div class="full-test-grid">
+      <b>과목</b><b>원점수</b><b>등급</b><b>오답 수</b><b>시간</b><b>틀린 번호</b><b>애매한 번호</b>
+      <span>국어</span><input class="input full-score" data-sub="국어" type="number"><input class="input full-grade" data-sub="국어" type="number" min="1" max="9"><input class="input full-wrong" data-sub="국어" type="number" min="0"><input class="input full-minutes" data-sub="국어" type="number" min="0"><input class="input full-wrong-questions" data-sub="국어" placeholder="3,7"><input class="input full-uncertain-questions" data-sub="국어" placeholder="5,18">
+      <span>수학</span><input class="input full-score" data-sub="수학" type="number"><input class="input full-grade" data-sub="수학" type="number" min="1" max="9"><input class="input full-wrong" data-sub="수학" type="number" min="0"><input class="input full-minutes" data-sub="수학" type="number" min="0"><input class="input full-wrong-questions" data-sub="수학" placeholder="3,7"><input class="input full-uncertain-questions" data-sub="수학" placeholder="5,18">
+      <span>영어</span><input class="input full-score" data-sub="영어" type="number"><input class="input full-grade" data-sub="영어" type="number" min="1" max="9"><input class="input full-wrong" data-sub="영어" type="number" min="0"><input class="input full-minutes" data-sub="영어" type="number" min="0"><input class="input full-wrong-questions" data-sub="영어" placeholder="3,7"><input class="input full-uncertain-questions" data-sub="영어" placeholder="5,18">
+      <span>사회문화</span><input class="input full-score" data-sub="사회문화" type="number"><input class="input full-grade" data-sub="사회문화" type="number" min="1" max="9"><input class="input full-wrong" data-sub="사회문화" type="number" min="0"><input class="input full-minutes" data-sub="사회문화" type="number" min="0"><input class="input full-wrong-questions" data-sub="사회문화" placeholder="3,7"><input class="input full-uncertain-questions" data-sub="사회문화" placeholder="5,18">
+      <span>경제</span><input class="input full-score" data-sub="경제" type="number"><input class="input full-grade" data-sub="경제" type="number" min="1" max="9"><input class="input full-wrong" data-sub="경제" type="number" min="0"><input class="input full-minutes" data-sub="경제" type="number" min="0"><input class="input full-wrong-questions" data-sub="경제" placeholder="3,7"><input class="input full-uncertain-questions" data-sub="경제" placeholder="5,18">
     </div>
   </div>
+  <div class="micro-label">공통 원인도 남길 수 있지만, 저장 뒤 문항별 분석에서 실제 원인과 재풀이일을 적는 것이 더 정확합니다.</div>
+  <div class="cause-picker">
+    <label><input type="checkbox" value="시간 부족">시간 부족</label><label><input type="checkbox" value="개념 부족">개념 부족</label><label><input type="checkbox" value="계산 실수">계산 실수</label><label><input type="checkbox" value="문제 해석">문제 해석</label><label><input type="checkbox" value="부주의">부주의</label><label><input type="checkbox" value="찍음">찍음</label>
+  </div>
+  <label>시간 붕괴 메모<textarea id="testTimingMemo" class="input" rows="2" placeholder="예: 5번에서 4분 손실 → 14번부터 압박 → 19·20 포기"></textarea></label><label>메모<textarea id="testMemo" class="input" rows="3"></textarea></label>
+  <div class="row end"><button class="btn ghost modal-close">취소</button><button id="saveTest" class="btn primary">저장</button></div>
+</div></div>
 
-  <dialog id="appDialog" class="app-dialog">
-    <form method="dialog" class="dialog-shell">
-      <header class="dialog-header">
-        <div>
-          <p class="eyebrow" id="dialogKicker">기록</p>
-          <h2 id="dialogTitle">입력</h2>
-        </div>
-        <button class="icon-button" id="dialogClose" type="button" aria-label="닫기">×</button>
-      </header>
-      <div id="dialogBody" class="dialog-body"></div>
-    </form>
-  </dialog>
+<!-- TEST QUESTION REVIEW MODAL -->
+<div id="testReviewModal" class="modal-back"><div class="modal wide">
+  <div class="card-head"><div><h3>문항 분석 · 재풀이</h3><div id="testReviewMeta" class="micro-label"></div></div><button class="btn ghost small modal-close">닫기</button></div>
+  <input id="testReviewId" type="hidden">
+  <div id="protocolReviewPanel"></div>
+  <div id="testReviewQuestions"></div>
+  <div class="row end"><button id="saveTestReview" class="btn primary">분석 저장</button></div>
+</div></div>
 
-  <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+<!-- COURSE META MODAL -->
+<div id="courseMetaModal" class="modal-back"><div class="modal wide">
+  <div class="card-head"><div><h3 id="courseMetaTitle">과정 분량·종료 기준</h3><div class="micro-label">완료율과 실전 사용 가능 여부를 분리</div></div><button class="btn ghost small modal-close">닫기</button></div>
+  <input id="courseMetaId" type="hidden"><input id="courseMetaKind" type="hidden">
+  <div class="grid g3"><label>단위당 최소(분)<input id="courseMetaLow" class="input" type="number" min="0" step="5"></label><label>단위당 최대(분)<input id="courseMetaHigh" class="input" type="number" min="0" step="5"></label><label>목표일<input id="courseMetaTarget" class="input" type="date"></label></div>
+  <label class="inline"><input id="courseMetaIncluded" type="checkbox"> 10월 16일 필요량 계산에 포함</label>
+  <div class="mastery-editor"><label><input id="masteryReview" type="checkbox"> 복습 완료</label><label><input id="masteryApply" type="checkbox"> 낯선 문제 적용 확인</label><label><input id="masteryExplain" type="checkbox"> 틀린 논리 설명 가능</label><label><input id="masteryTimed" type="checkbox"> 제한시간 내 재현</label></div>
+  <label>종료 기준 메모<textarea id="courseMetaNote" class="input" rows="3" placeholder="예: 실모 2회에서 같은 자료 판독 오류가 재발하지 않으면 종료"></textarea></label>
+  <div class="row end"><button class="btn ghost modal-close">취소</button><button id="saveCourseMeta" class="btn primary">저장</button></div>
+</div></div>
 
-  <noscript>이 앱은 기기 안에서 기록을 계산하기 위해 JavaScript가 필요합니다.</noscript>
-  <script src="./initial-state.js"></script>
-  <script src="./core.js"></script>
-  <script src="./storage.js"></script>
-  <script src="./charts.js"></script>
-  <script src="./app.js"></script>
+<!-- PROTOCOL MODAL -->
+<div id="protocolModal" class="modal-back"><div class="modal">
+  <h3>과목별 시험 규칙</h3>
+  <label>과목<select id="protocolSubject" class="input"><option>국어</option><option>수학</option><option>영어</option><option>사회문화</option><option>경제</option></select></label>
+  <label>규칙 1<input id="protocolRule1" class="input" placeholder="예: 시점·주체·단위를 먼저 표시"></label><label>규칙 2<input id="protocolRule2" class="input"></label><label>규칙 3<input id="protocolRule3" class="input"></label>
+  <div class="row end"><button class="btn ghost modal-close">취소</button><button id="saveProtocol" class="btn primary">저장</button></div>
+</div></div>
+
+<!-- NOW MODAL -->
+<div id="nowModal" class="modal-back"><div class="modal now-modal">
+  <span id="nowClock" class="eyebrow"></span><h3 id="nowBlockTitle">지금 할 것</h3><div id="nowTasks"></div>
+  <div class="row end"><button class="btn ghost modal-close">닫기</button></div>
+</div></div>
+
+<!-- CLOSE DAY -->
+<div id="closeDayModal" class="modal-back"><div class="modal wide">
+  <div class="card-head"><div><h3>오늘 마감</h3><div class="micro-label">미완료 정리 · 순공 확정</div></div><span id="closeDateBadge" class="badge"></span></div>
+  <div id="closeStudySummary" class="study-time-box"></div>
+  <label>최종 순공시간(h)<input id="closeStudyOverride" class="input short" type="number" min="0" step="0.1"></label>
+  <div id="closeUnfinished"></div>
+  <div class="row"><button id="copyTodayRecord" class="btn ghost">오늘 기록 복사</button></div>
+  <div class="row end"><button class="btn ghost modal-close">취소</button><button id="confirmCloseDay" class="btn primary">마감 완료</button></div>
+</div></div>
+
+<script src="./app-v90.js?v=900" defer></script>
 </body>
 </html>
