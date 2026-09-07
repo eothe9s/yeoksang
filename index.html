@@ -7,9 +7,9 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="曆象">
-<link rel="manifest" href="./manifest-v110.webmanifest?v=1100">
+<link rel="manifest" href="./manifest-v110.webmanifest?v=1110">
 <link rel="apple-touch-icon" href="./icon-192.png">
-<link rel="stylesheet" href="./styles-v110.css?v=1100">
+<link rel="stylesheet" href="./styles-v110.css?v=1110">
 <title>曆象 · 수능 만점 운영체제</title>
 </head>
 <body>
@@ -18,7 +18,7 @@
   <aside class="sidebar">
     <div class="brand">
       <div class="brand-mark" aria-label="역상">曆</div>
-      <div><h1>曆象</h1><p>수능 만점 운영체제</p><span>v11 · PERFECT SCORE</span></div>
+      <div><h1>曆象</h1><span>v11.1</span></div>
     </div>
     <nav id="mainNav" aria-label="주 메뉴">
       <button class="active" data-page="dashboard">오늘</button>
@@ -56,13 +56,13 @@
       </div>
 
       <article class="execution-hero">
-        <div class="hero-head"><div><span class="eyebrow">오늘의 실행</span><h3>지금 정확하게 할 것만 남긴다.</h3></div><span id="planLockBadge" class="badge">계획 열림</span></div>
+        <div class="hero-head"><div><span class="eyebrow">오늘의 실행</span></div><span id="planLockBadge" class="badge">계획 열림</span></div>
         <div class="hero-metrics v11-metrics">
           <div class="hero-metric primary"><span>지금 할 것</span><b id="focusNowTask">아직 없음</b><small id="focusCurrentBlock">현재 블록 없음</small></div>
-          <div class="hero-metric"><span>오늘 실제 최대 가용</span><b id="todayAvailableHours">계산 중</b><small>시간표 · 고정일정 · 수면 경계 반영</small></div>
-          <div class="hero-metric"><span>오늘 마감 필요량</span><b id="todayNeedHours">분량 미정</b><small id="todayNeedCaption">과정별 목표일 역산</small></div>
-          <div class="hero-metric"><span>기간 평균 필요량</span><b id="periodAverageHours">계산 중</b><small id="periodAverageCaption">남은 전체 학습량 ÷ 남은 기간</small></div>
-          <div class="hero-metric"><span>계획 부족 / 초과</span><b id="todayPlanGap">계산 중</b><small id="todayPlanGapCaption">오늘 필요량과 가용시간 비교</small></div>
+          <div class="hero-metric"><span>오늘 실제 최대 가용</span><b id="todayAvailableHours">계산 중</b></div>
+          <div class="hero-metric"><span>오늘 마감 필요량</span><b id="todayNeedHours">분량 미정</b><small id="todayNeedCaption"></small></div>
+          <div class="hero-metric"><span>기간 평균 필요량</span><b id="periodAverageHours">계산 중</b><small id="periodAverageCaption"></small></div>
+          <div class="hero-metric"><span>계획 부족 / 초과</span><b id="todayPlanGap">계산 중</b><small id="todayPlanGapCaption"></small></div>
           <div class="hero-metric"><span>오늘 완주</span><b id="focusTaskCount">0/0</b><small id="todayCompletionCaption">필수와 전체를 분리해 기록</small></div>
         </div>
         <div class="hero-subline"><span>남은 계획 자습 <b id="focusRemainStudy">0분</b></span><span id="sleepGuardMini">수면 규칙 확인 중</span></div>
@@ -76,11 +76,11 @@
 
       <div class="today-workspace">
         <article class="workspace-panel tasks-panel">
-          <div class="card-head"><div><h3>오늘 할 일</h3><div class="micro-label">약속한 분량은 오늘의 기록으로 남습니다.</div></div><div class="row"><select id="taskSortMode" class="input task-sort-select" aria-label="오늘 할 일 정렬"><option value="timeline">시간순</option><option value="subject">과목순</option></select><button id="addTaskBtn" class="btn ghost small">+ 추가</button><button id="openWaitingBtn" class="btn ghost small">대기함</button></div></div>
+          <div class="card-head"><div><h3>오늘 할 일</h3></div><div class="row"><select id="taskSortMode" class="input task-sort-select" aria-label="오늘 할 일 정렬"><option value="timeline">시간순</option><option value="subject">과목순</option></select><button id="addTaskBtn" class="btn ghost small">+ 추가</button><button id="openWaitingBtn" class="btn ghost small">대기함</button></div></div>
           <div id="todayTasks" class="task-list"></div>
         </article>
         <article class="workspace-panel schedule-panel">
-          <div class="card-head"><div><h3>오늘 시간표</h3><div class="micro-label">할 일 → 블록 → 지금 할 것</div></div><button id="togglePlanLock" class="btn ghost small">오늘 계획 확정</button></div>
+          <div class="card-head"><div><h3>오늘 시간표</h3></div><button id="togglePlanLock" class="btn ghost small">오늘 계획 확정</button></div>
           <div id="todayScheduleList" class="compact-schedule"></div>
           <div class="study-time-box clean"><div><span>계획 자습</span><b id="plannedStudyTime">0분</b></div><div><span>자동 실제</span><b id="autoStudyTime">0분</b></div><div><span>최종 순집중</span><b id="finalStudyTime">0분</b></div></div>
           <div class="row"><input id="studyOverrideHours" class="input short" type="number" step="0.1" min="0" max="20" placeholder="수정 h"><button id="saveStudyOverride" class="btn primary small">순공 수정</button><button id="resetStudyOverride" class="btn ghost small">자동값</button></div>
@@ -89,9 +89,9 @@
       </div>
 
       <details class="today-more"><summary>오늘 상세 보기</summary>
-      <article class="quota-panel"><div class="card-head"><div><h3>오늘 과목별 최소 배정</h3><div class="micro-label">남은 과정 시간의 비중만 계산합니다. 분량이 미정이면 억지로 추정하지 않습니다.</div></div><button class="btn ghost small" data-go="progress">분량·종료 기준</button></div><div id="dailyQuotaBySubject"></div></article>
+      <article class="quota-panel"><div class="card-head"><div><h3>오늘 과목별 최소 배정</h3></div><button class="btn ghost small" data-go="progress">분량·종료 기준</button></div><div id="dailyQuotaBySubject"></div></article>
 
-      <article class="decision-panel"><div class="card-head"><div><h3>오늘의 판단</h3><div class="micro-label">마감 · 최근 오류 · 시험 단계 · 이번 주 지휘 · 실제 가용시간을 함께 봅니다.</div></div><span id="decisionConfidence" class="badge">근거 계산 중</span></div><div id="decisionBoard"></div><div id="decisionOverrideState" class="micro-label"></div></article>
+      <article class="decision-panel"><div class="card-head"><div><h3>오늘의 판단</h3></div><span id="decisionConfidence" class="badge">근거 계산 중</span></div><div id="decisionBoard"></div><div id="decisionOverrideState" class="micro-label"></div></article>
 
       <div class="grid g2 secondary-panels">
         <article class="card"><div class="card-head"><h3>최근 7일 완주</h3><button class="btn ghost small" data-go="month">월간</button></div><div id="completionQuick" class="completion-list"></div></article>
@@ -368,13 +368,13 @@
     <!-- ANALYSIS -->
     <section id="analysis" class="page">
       <div class="analysis-launcher"><button class="btn ghost small" data-go="month">월간 달력</button><button class="btn ghost small" data-go="week">주간 시간표</button><button class="btn ghost small" data-go="progress">과정 진도</button><button class="btn ghost small" data-go="condition">수면·컨디션</button><button class="btn ghost small" data-go="goals">목표·진단</button></div>
-      <article class="card weekly-command-card"><div class="card-head"><div><h3>주간 지휘</h3><div class="micro-label">사실을 정리하고 다음 주 판단은 직접 남깁니다.</div></div><span id="weekCommandLabel" class="badge"></span></div><div id="weeklyCommand"></div><div class="weekly-priorities"><label>다음 주 핵심 1<input id="weeklyPriority1" class="input" placeholder="가장 중요한 한 가지"></label><label>핵심 2<input id="weeklyPriority2" class="input"></label><label>핵심 3<input id="weeklyPriority3" class="input"></label><label>줄이거나 중단할 자료<input id="weeklyStop" class="input"></label><button id="saveWeeklyCommand" class="btn primary">주간 판단 저장</button></div></article>
-      <article class="card"><div class="card-head"><div><h3>과목별 만점 준비도</h3><div class="micro-label">가짜 백분율 대신 개념·적용·실행·안정의 증거를 따로 봅니다.</div></div></div><div id="readinessBoard"></div></article>
+      <article class="card weekly-command-card"><div class="card-head"><div><h3>주간 지휘</h3></div><span id="weekCommandLabel" class="badge"></span></div><div id="weeklyCommand"></div><div class="weekly-priorities"><label>다음 주 핵심 1<input id="weeklyPriority1" class="input" placeholder="가장 중요한 한 가지"></label><label>핵심 2<input id="weeklyPriority2" class="input"></label><label>핵심 3<input id="weeklyPriority3" class="input"></label><label>줄이거나 중단할 자료<input id="weeklyStop" class="input"></label><button id="saveWeeklyCommand" class="btn primary">주간 판단 저장</button></div></article>
+      <article class="card"><div class="card-head"><div><h3>과목별 만점 준비도</h3></div></div><div id="readinessBoard"></div></article>
       <div class="grid g2">
         <article class="card"><div class="card-head"><h3>월간 분석</h3><input id="analysisMonth" class="input month-input" type="month"></div><div id="analysisStats" class="mini-stat-grid"></div><div id="subjectBalance"></div></article>
         <article class="card"><h3>최근 7일</h3><div id="recent7Stats" class="mini-stat-grid"></div><h3 class="subhead">최근 학습 공백</h3><div id="analysisGap" class="gap-list"></div></article>
       </div>
-      <article class="card"><div class="card-head"><div><h3>오류 패턴</h3><div class="micro-label">번호가 달라도 반복되는 행동을 묶어 봅니다.</div></div></div><div id="errorPatternBoard"></div></article>
+      <article class="card"><div class="card-head"><div><h3>오류 패턴</h3></div></div><div id="errorPatternBoard"></div></article>
     </section>
 
     <!-- SETTINGS -->
@@ -433,7 +433,7 @@
       </article>
     </section>
 
-    <footer>曆象 · 수능 만점 운영체제 · HTML 11 · JS <span id="runtimeStatus">확인 중</span></footer>
+    <footer>曆象 · v11.1 · JS <span id="runtimeStatus">확인 중</span></footer>
   </main>
 </div>
 
@@ -633,9 +633,9 @@
   <div class="row end"><button class="btn ghost modal-close">취소</button><button id="confirmCloseDay" class="btn primary">마감 완료</button></div>
 </div></div>
 
-<script src="./baseline-v110.js?v=1100" defer></script>
-<script src="./app-v110-core.js?v=1100" defer></script>
-<script src="./app-v110-engine.js?v=1100" defer></script>
-<script src="./app-v110-recovery.js?v=1100" defer></script>
+<script src="./baseline-v110.js?v=1110" defer></script>
+<script src="./app-v110-core.js?v=1110" defer></script>
+<script src="./app-v110-engine.js?v=1110" defer></script>
+<script src="./app-v110-recovery.js?v=1110" defer></script>
 </body>
 </html>

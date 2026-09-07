@@ -1,9 +1,9 @@
 /* 曆象 v11 · 수능 만점 운영체제 */
 'use strict';
 
-const APP_VERSION='11.0';
+const APP_VERSION='11.1';
 const SCHEMA_VERSION=14;
-const BUILD='2026-09-07-v11';
+const BUILD='2026-09-07-v11.1';
 const EXAM9='2026-09-02';
 const CSAT='2026-11-19';
 const SUBJECTS=['국어','수학','영어','사회문화','경제'];
@@ -1439,7 +1439,7 @@ async function copyText(text){try{await navigator.clipboard.writeText(text);aler
 function renderVersionStatus__impl1(){$('#runtimeStatus').textContent=`${APP_VERSION} · SW ${APP_VERSION}`} 
 
 function initPwaUpdate__impl1(){
- if(!('serviceWorker'in navigator))return;navigator.serviceWorker.register('./sw-v110.js?v=1100').then(reg=>{reg.update().catch(()=>{});reg.addEventListener('updatefound',()=>{const w=reg.installing;if(!w)return;w.addEventListener('statechange',()=>{if(w.state==='installed'&&navigator.serviceWorker.controller)$('#updateBanner')?.classList.remove('hidden')})})}).catch(()=>{});navigator.serviceWorker.addEventListener('controllerchange',()=>$('#updateBanner')?.classList.remove('hidden'));const btn=$('#reloadUpdate');if(btn)btn.onclick=()=>location.reload()
+ if(!('serviceWorker'in navigator))return;navigator.serviceWorker.register('./sw-v110.js?v=1110').then(reg=>{reg.update().catch(()=>{});reg.addEventListener('updatefound',()=>{const w=reg.installing;if(!w)return;w.addEventListener('statechange',()=>{if(w.state==='installed'&&navigator.serviceWorker.controller)$('#updateBanner')?.classList.remove('hidden')})})}).catch(()=>{});navigator.serviceWorker.addEventListener('controllerchange',()=>$('#updateBanner')?.classList.remove('hidden'));const btn=$('#reloadUpdate');if(btn)btn.onclick=()=>location.reload()
 }
 
 function bindEvents__impl1(){
@@ -1692,4 +1692,4 @@ function bindEvents__impl2(){bindEventsV8();$('#saveCourseMeta').onclick=saveCou
 __impl_renderVersionStatus=renderVersionStatus__impl2;
 function renderVersionStatus__impl2(){$('#runtimeStatus').textContent=`${APP_VERSION} · SW ${APP_VERSION}`};
 __impl_initPwaUpdate=initPwaUpdate__impl2;
-function initPwaUpdate__impl2(){if(!('serviceWorker'in navigator))return;navigator.serviceWorker.register('./sw-v110.js?v=1100').then(reg=>{reg.update().catch(()=>{});reg.addEventListener('updatefound',()=>{const w=reg.installing;if(!w)return;w.addEventListener('statechange',()=>{if(w.state==='installed'&&navigator.serviceWorker.controller)$('#updateBanner')?.classList.remove('hidden')})})}).catch(()=>{});navigator.serviceWorker.addEventListener('controllerchange',()=>$('#updateBanner')?.classList.remove('hidden'));const btn=$('#reloadUpdate');if(btn)btn.onclick=()=>location.reload()};
+function initPwaUpdate__impl2(){if(!('serviceWorker'in navigator))return;navigator.serviceWorker.register('./sw-v110.js?v=1110').then(reg=>{reg.update().catch(()=>{});reg.addEventListener('updatefound',()=>{const w=reg.installing;if(!w)return;w.addEventListener('statechange',()=>{if(w.state==='installed'&&navigator.serviceWorker.controller)$('#updateBanner')?.classList.remove('hidden')})})}).catch(()=>{});navigator.serviceWorker.addEventListener('controllerchange',()=>$('#updateBanner')?.classList.remove('hidden'));const btn=$('#reloadUpdate');if(btn)btn.onclick=()=>location.reload()};

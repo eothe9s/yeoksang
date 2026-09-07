@@ -218,3 +218,21 @@ test('v11 public function surface has no same-name override chain',()=>{
  assert.equal((src.match(/^[A-Za-z_$][\w$]*\s*=\s*function\s*\(/gm)||[]).length,0);
 });
 console.log('ALL V11 STRUCTURE TESTS PASSED');
+
+test('v11.1 removes prototype-like helper copy from primary screens',()=>{
+ const html=fs.readFileSync(__dirname+'/index.html','utf8');
+ ['지금 정확하게 할 것만 남긴다.','시간표 · 고정일정 · 수면 경계 반영','약속한 분량은 오늘의 기록으로 남습니다.','할 일 → 블록 → 지금 할 것','사실을 정리하고 다음 주 판단은 직접 남깁니다.'].forEach(x=>assert.ok(!html.includes(x),x));
+});
+test('v11.1 timetable is compact on iPad landscape',()=>{
+ const css=fs.readFileSync(__dirname+'/styles-v110.css','utf8');
+ assert.ok(css.includes('grid-template-columns:460px 250px!important'));
+ assert.ok(css.includes('grid-template-columns:46px repeat(6,69px)!important'));
+ assert.ok(css.includes('@media(max-width:1180px) and (min-width:821px)'));
+});
+test('v11.1 restores compact dark navigation rhythm',()=>{
+ const css=fs.readFileSync(__dirname+'/styles-v110.css','utf8');
+ const html=fs.readFileSync(__dirname+'/index.html','utf8');
+ assert.ok(css.includes('background:#171925;color:#fff'));
+ assert.ok(css.includes('font-size:15px!important;letter-spacing:-.02em!important;color:#fff!important'));
+ assert.ok(html.includes('<h1>曆象</h1><span>v11.1</span>'));
+});
