@@ -58,7 +58,7 @@ function applyPersonalBaselineV101(){
  DB.meta=DB.meta||{};DB.meta.personalBaselineV101Applied={at:Date.now(),asOf:b.asOf||''};saveDB({undo:false});
 }
 ensureV100DB();
-applyPersonalBaselineV101();
+// Personal recovery is explicit; never reset progress automatically at startup.
 
 /* ---------- goal stages ---------- */
 __impl_activeStage=activeStage__impl2;

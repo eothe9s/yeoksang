@@ -7,9 +7,10 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="曆象">
-<link rel="manifest" href="./manifest-v200.webmanifest?v=2000">
+<link rel="manifest" href="./manifest-v200.webmanifest?v=2100">
 <link rel="apple-touch-icon" href="./icon-192.png">
-<link rel="stylesheet" href="./styles-v200.css?v=2000">
+<link rel="stylesheet" href="./styles-v200.css?v=2100">
+<link rel="stylesheet" href="./styles-v210.css?v=2100">
 <title>曆象 · 수능 만점 운영체제</title>
 </head>
 <body>
@@ -18,7 +19,7 @@
   <aside class="sidebar">
     <div class="brand">
       <div class="brand-mark" aria-label="역상">曆</div>
-      <div><h1>曆象</h1><span>v2.0</span></div>
+      <div><h1>曆象</h1><span>v2.1</span></div>
     </div>
     <nav id="mainNav" aria-label="주 메뉴">
       <button class="active" data-page="dashboard">오늘</button>
@@ -92,7 +93,7 @@
       </div>
 
       <details class="today-more"><summary>오늘 상세 보기</summary>
-      <article class="quota-panel"><div class="card-head"><div><h3>오늘 과목별 최소 배정</h3></div><button class="btn ghost small" data-go="progress">분량·종료 기준</button></div><div id="dailyQuotaBySubject"></div></article>
+      <article class="quota-panel"><div class="card-head"><div><h3>오늘 과목별 필요·계획 시간</h3></div><button class="btn ghost small" data-go="progress">분량·종료 기준</button></div><div id="dailyQuotaBySubject"></div></article>
 
       <article class="decision-panel"><div class="card-head"><div><h3>오늘의 판단</h3></div><span id="decisionConfidence" class="badge">근거 계산 중</span></div><div id="decisionBoard"></div><div id="decisionOverrideState" class="micro-label"></div></article>
 
@@ -375,6 +376,7 @@
       <article class="card"><div class="card-head"><div><h3>과목별 만점 준비도</h3></div></div><div id="readinessBoard"></div></article>
       <div class="grid g2">
         <article class="card"><div class="card-head"><h3>월간 분석</h3><input id="analysisMonth" class="input month-input" type="month"></div><div id="analysisStats" class="mini-stat-grid"></div><div id="subjectBalance"></div></article>
+        <article class="card"><details><summary>단원별 점검 범위</summary><div class="row"><select id="y21CoverageSubject" class="input"><option>국어</option><option>수학</option><option>영어</option><option>사회문화</option><option>경제</option></select><button id="y21CoverageEdit" class="btn ghost small">범위 편집</button></div><div id="y21Coverage"></div></details></article>
         <article class="card"><h3>최근 7일</h3><div id="recent7Stats" class="mini-stat-grid"></div><h3 class="subhead">최근 학습 공백</h3><div id="analysisGap" class="gap-list"></div></article>
       </div>
       <article class="card"><div class="card-head"><div><h3>오류 패턴</h3></div></div><div id="errorPatternBoard"></div></article>
@@ -436,7 +438,7 @@
       </article>
     </section>
 
-    <footer>曆象 · v2.0 · JS <span id="runtimeStatus">확인 중</span></footer>
+    <footer>曆象 · v2.1 · JS <span id="runtimeStatus">확인 중</span></footer>
   </main>
 </div>
 
@@ -604,6 +606,9 @@
   <div class="card-head"><div><h3 id="courseMetaTitle">과정 분량·종료 기준</h3><div class="micro-label">완료율과 실전 사용 가능 여부를 분리</div></div><button class="btn ghost small modal-close">닫기</button></div>
   <input id="courseMetaId" type="hidden"><input id="courseMetaKind" type="hidden">
   <div class="grid g3"><label>단위당 최소(분)<input id="courseMetaLow" class="input" type="number" min="0" step="5"></label><label>단위당 최대(분)<input id="courseMetaHigh" class="input" type="number" min="0" step="5"></label><label>목표일<input id="courseMetaTarget" class="input" type="date"></label></div>
+  <div class="grid g2"><label>공개 시작<input id="y21ReleaseStart" class="input" type="date"></label><label>공개 완료 예정<input id="y21ReleaseEnd" class="input" type="date"></label></div>
+  <label>시간 근거<input id="y21TimeSource" class="input" placeholder="예: 복습 포함 추정 / 엮어읽기 별도 / 풀이시간 내장"></label>
+  <details><summary>단위당 시간 세부 계산 (선택)</summary><label>계산 방식<select id="y21TimeMode" class="input"><option value="total">위 최소·최대 총시간 사용</option><option value="parts">시청·풀이·과제 합산</option></select></label><div class="grid g2"><label>시청 원시간(풀이 제외, 분)<input id="y21Watch" class="input" type="number" min="0"></label><label>시청 배속<input id="y21Speed" class="input" type="number" min="1" max="3" step="0.1"></label><label>풀이시간(내장 타이머 포함, 분)<input id="y21Practice" class="input" type="number" min="0"></label><label>과제·복습(분)<input id="y21Review" class="input" type="number" min="0"></label></div></details>
   <label class="inline"><input id="courseMetaIncluded" type="checkbox"> 과정별 목표일 필요량 계산에 포함</label>
   <div id="courseMasteryEvidence" class="mastery-evidence"></div>
   <div class="mastery-editor"><label><input id="masteryReview" type="checkbox"> 복습 완료</label><label><input id="masteryApply" type="checkbox"> 낯선 문제 적용 확인</label><label><input id="masteryExplain" type="checkbox"> 틀린 논리 설명 가능</label><label><input id="masteryTimed" type="checkbox"> 제한시간 내 재현</label></div>
@@ -636,9 +641,10 @@
   <div class="row end"><button class="btn ghost modal-close">취소</button><button id="confirmCloseDay" class="btn primary">마감 완료</button></div>
 </div></div>
 
-<script src="./baseline-v200.js?v=2000" defer></script>
-<script src="./app-v200-core.js?v=2000" defer></script>
-<script src="./app-v200-engine.js?v=2000" defer></script>
-<script src="./app-v200-recovery.js?v=2000" defer></script>
+<div class="modal-back" id="y21MergeModal" role="dialog" aria-modal="true" aria-labelledby="y21MergeTitle"><div class="modal"><h3 id="y21MergeTitle">기록 병합</h3><div id="y21MergeBody"></div><div class="y21-modal-actions"><button class="btn ghost modal-close">취소</button><button class="btn primary" id="y21ApplyMerge">선택대로 병합</button></div></div></div>
+<script src="./app-v200-core.js?v=2100" defer></script>
+<script src="./app-v200-engine.js?v=2100" defer></script>
+<script src="./app-v200-recovery.js?v=2100" defer></script>
+<script src="./app-v210.js?v=2100" defer></script>
 </body>
 </html>

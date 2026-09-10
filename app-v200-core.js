@@ -1,9 +1,9 @@
 /* 曆象 v2 · 수능 만점 운영체제 */
 'use strict';
 
-const APP_VERSION='2.0';
+const APP_VERSION='2.1';
 const SCHEMA_VERSION=14;
-const BUILD='2026-09-07-v2.0';
+const BUILD='2026-09-10-v2.1';
 const EXAM9='2026-09-02';
 const CSAT='2026-11-19';
 const SUBJECTS=['국어','수학','영어','사회문화','경제'];
@@ -229,7 +229,7 @@ function normalizeQuestionRecord__impl1(q,fallback={}){
  if(!Number.isInteger(number)||number<1||number>99)return null;
  const status=q?.status==='uncertain'?'uncertain':'wrong';
  const retryState=q?.retryState==='resolved'?'resolved':'pending';
- return {id:q?.id||`q-${subject}-${number}-${status}`,subject,number,status,type:String(q?.type||''),cause:ERROR_CAUSES.includes(q?.cause)?q.cause:'',note:String(q?.note||''),retryDue:String(q?.retryDue||fallback.retryDue||''),retryState,retryHistory:Array.isArray(q?.retryHistory)?q.retryHistory.map(x=>({date:String(x?.date||''),result:String(x?.result||'')})):[],pattern:String(q?.pattern||''),trigger:String(q?.trigger||''),behavior:String(q?.behavior||''),missedCheck:String(q?.missedCheck||''),rootCause:String(q?.rootCause||''),controlRule:String(q?.controlRule||''),answerOutcome:String(q?.answerOutcome||''),answerChanged:Boolean(q?.answerChanged)}
+ return {...deep(q||{}),id:q?.id||`q-${subject}-${number}-${status}`,subject,number,status,type:String(q?.type||''),cause:ERROR_CAUSES.includes(q?.cause)?q.cause:'',note:String(q?.note||''),retryDue:String(q?.retryDue||fallback.retryDue||''),retryState,retryHistory:Array.isArray(q?.retryHistory)?q.retryHistory.map(x=>({...x,date:String(x?.date||''),result:String(x?.result||'')})):[],pattern:String(q?.pattern||''),trigger:String(q?.trigger||''),behavior:String(q?.behavior||''),missedCheck:String(q?.missedCheck||''),rootCause:String(q?.rootCause||''),controlRule:String(q?.controlRule||''),answerOutcome:String(q?.answerOutcome||''),answerChanged:Boolean(q?.answerChanged)}
 }
 function questionRecordsFromTexts(subject,wrongText,uncertainText,date,existing=[]){
  const byKey=new Map();
@@ -261,6 +261,7 @@ function automationRunKey(ruleId,date){return `${ruleId}:${date}`}
 function inferAutomationRuns(d){d.automationRuns=d.automationRuns||{};Object.entries(d.tasks||{}).forEach(([date,arr])=>(arr||[]).forEach(t=>{if(t.automationRuleId)d.automationRuns[automationRunKey(t.automationRuleId,date)]={status:'task',taskId:t.id,at:d.automationRuns[automationRunKey(t.automationRuleId,date)]?.at||Date.now()}}));(d.automationConflicts||[]).forEach(c=>{if(c.ruleId&&c.date)d.automationRuns[automationRunKey(c.ruleId,c.date)]={status:'conflict',conflictId:c.id,at:Date.now()}});return d}
 function normalizeDBShape(d){
  const base=defaultDB();d={...base,...(d||{}),settings:{...base.settings,...((d||{}).settings||{})}};
+ for(const k of ['weeklyNotes','courseMeta','subjectProtocols'])if(!d[k]||typeof d[k]!=='object'||Array.isArray(d[k]))d[k]={};
  d.settings.periodTimes={...base.settings.periodTimes,...(d.settings.periodTimes||{})};
  if(!['subject','timeline'].includes(d.settings.taskSortMode))d.settings.taskSortMode='timeline';
  ['customLectures','books','automations','automationConflicts','waiting','tests','recentLearning','trash','closeHistory','scheduleTemplates'].forEach(k=>{if(!Array.isArray(d[k]))d[k]=[]});
@@ -282,7 +283,11 @@ function migrateDB(raw){
  inferAutomationRuns(d);d.schema=SCHEMA_VERSION;return d
 }
 function loadDB(){
- let raw=null;try{raw=JSON.parse(localStorage.getItem(DB_KEY)||'null')}catch{}
+ let raw=null,stored=null;
+ try{stored=localStorage.getItem(DB_KEY);if(stored!==null){raw=JSON.parse(stored);if(!raw||typeof raw!=='object'||Array.isArray(raw))throw new Error('invalid saved data')}}catch(e){
+  document.addEventListener('DOMContentLoaded',()=>{document.body.textContent='저장된 기록을 읽지 못해 앱을 안전 정지했습니다. Safari 웹사이트 데이터를 지우지 마세요. 기존 백업을 확보한 뒤 복구를 진행해야 합니다.'});
+  throw new Error('Saved data unreadable; initialization stopped without overwriting.');
+ }
  if(!raw){
   const legacyKeys=['p11122_v2_tasks','p11122_v2_schedules','p11122_v30_custom_lectures','p11122_v40_problem_books','p11122_v2_tests'];
   const hasLegacy=legacyKeys.some(k=>localStorage.getItem(k)!=null);
@@ -291,7 +296,8 @@ function loadDB(){
  }
  const from=Number(raw.schema)||0;
  if(from&&from<SCHEMA_VERSION){try{safeSetItem(`p11122_pre_migration_v${from}`,JSON.stringify(raw),{silent:true})}catch{}}
- const d=migrateDB(raw);safeSetItem(DB_KEY,JSON.stringify(d),{silent:true});return d
+ if(stored!==null&&localStorage.getItem('yeoksang_pre_v21_original')===null&&!safeSetItem('yeoksang_pre_v21_original',stored))throw new Error('Pre-update backup failed; stopping safely');
+ const d=migrateDB(raw);return d
 }
 let DB=loadDB();
 let LAST_SAVED_JSON=JSON.stringify(DB);
