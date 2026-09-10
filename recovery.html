@@ -1,0 +1,12 @@
+<!doctype html><html lang="ko"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>曆象 · 기록 보호</title>
+<style>body{font:16px system-ui;background:#f2f5f9;color:#243447;max-width:640px;margin:50px auto;padding:24px}button,a{display:inline-block;padding:14px;margin:8px 8px 8px 0}button{background:#607da8;color:white;border:0;border-radius:12px}pre{white-space:pre-wrap;overflow-wrap:anywhere}p{line-height:1.7}</style>
+<h1>曆象 · 기록 보호</h1><p>이 페이지는 저장값을 읽고 파일로 내보내기만 합니다. 기록 삭제·초기화·덮어쓰기를 하지 않습니다. 기존 앱과 같은 Safari에서 열어 주세요.</p>
+<button id="raw">기존 DB 원본 내려받기</button><button id="all">관련 저장값 전체 내려받기</button><pre id="status"></pre><a href="./index.html?v=2110">앱으로 돌아가기</a>
+<script>
+const status=document.getElementById('status');
+function download(value,name){const url=URL.createObjectURL(new Blob([value],{type:'application/json'}));const a=document.createElement('a');a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),60000)}
+function report(e){status.textContent='읽기 실패: '+e.name+'. 웹사이트 데이터를 지우지 마세요. 일반 Safari에서 기존 앱을 사용했던 주소로 접속했는지 확인해 주세요.'}
+document.getElementById('raw').onclick=()=>{try{const raw=localStorage.getItem('p11122_v60_db');if(raw===null){status.textContent='이 브라우저에서 주 DB를 찾지 못했습니다. 기록이 삭제됐다고 단정할 수 없습니다. 관련 저장값 전체 내보내기도 확인해 주세요.';return}download(raw,'YEOKSANG_EXISTING_RAW.json');status.textContent='원본 파일 다운로드를 요청했습니다. 파일 앱에서 실제 저장 여부를 확인하세요.'}catch(e){report(e)}};
+document.getElementById('all').onclick=()=>{try{const values={};for(let i=0;i<localStorage.length;i++){const key=localStorage.key(i);if(/^(p11122|yeoksang)/i.test(key))values[key]=localStorage.getItem(key)}download(JSON.stringify({format:'yeoksang-raw-storage-v1',exportedAt:new Date().toISOString(),values},null,2),'YEOKSANG_STORAGE_ARCHIVE.json');status.textContent=Object.keys(values).length+'개 저장값 다운로드 요청. 이 파일은 일반 백업 가져오기용이 아닌 원본 복구 자료입니다.'}catch(e){report(e)}};
+try{const raw=localStorage.getItem('p11122_v60_db');status.textContent=raw===null?'주 DB 없음 — 기존 Safari와 주소를 확인해 주세요.':'주 DB 발견 ('+raw.length+'자). 먼저 원본을 내려받으세요.'}catch(e){report(e)}
+</script></html>
