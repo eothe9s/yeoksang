@@ -1,7 +1,7 @@
 <!doctype html><html lang="ko"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>曆象 · 기록 보호</title>
 <style>body{font:16px system-ui;background:#f2f5f9;color:#243447;max-width:640px;margin:50px auto;padding:24px}button,a{display:inline-block;padding:14px;margin:8px 8px 8px 0}button{background:#607da8;color:white;border:0;border-radius:12px}pre{white-space:pre-wrap;overflow-wrap:anywhere}p{line-height:1.7}</style>
 <h1>曆象 · 기록 보호</h1><p>이 페이지는 저장값을 읽고 파일로 내보내기만 합니다. 기록 삭제·초기화·덮어쓰기를 하지 않습니다. 기존 앱과 같은 Safari에서 열어 주세요.</p>
-<button id="raw">기존 DB 원본 내려받기</button><button id="all">관련 저장값 전체 내려받기</button><pre id="status"></pre><a href="./index.html?v=2110">앱으로 돌아가기</a>
+<button id="raw">기존 DB 원본 내려받기</button><button id="all">관련 저장값 전체 내려받기</button><pre id="status"></pre><a href="./index.html?v=2200">앱으로 돌아가기</a>
 <script>
 const status=document.getElementById('status');
 function download(value,name){const url=URL.createObjectURL(new Blob([value],{type:'application/json'}));const a=document.createElement('a');a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),60000)}

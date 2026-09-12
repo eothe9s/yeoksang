@@ -185,7 +185,7 @@ function y21RenderCoverage(){const box=$('#y21Coverage');if(!box)return;const su
 const y21Analysis=__impl_renderAnalysis;
 __impl_renderAnalysis=function(){y21Analysis();y21RenderCoverage()};
 document.addEventListener('DOMContentLoaded',()=>{$('#y21CoverageSubject').onchange=y21RenderCoverage;$('#y21CoverageEdit').onclick=()=>{const s=$('#y21CoverageSubject').value,raw=prompt('단원·유형을 쉼표로 구분해 입력하세요. 기존 시험 기록은 삭제되지 않습니다.',(DB.coverageTopics?.[s]||[]).join(', '));if(raw===null)return;DB.coverageTopics=DB.coverageTopics||{};DB.coverageTopics[s]=[...new Set(raw.split(/[,\n]/).map(x=>x.trim()).filter(Boolean))];saveDB();y21RenderCoverage()};});
-__impl_initPwaUpdate=function(){if(!('serviceWorker'in navigator))return;navigator.serviceWorker.register('./sw-v200.js?v=2110').then(r=>r.update()).catch(()=>{});navigator.serviceWorker.addEventListener('controllerchange',()=>$('#updateBanner')?.classList.remove('hidden'));if($('#reloadUpdate'))$('#reloadUpdate').onclick=()=>location.reload()};
-__impl_renderVersionStatus=()=>{$('#runtimeStatus').textContent='2.1.1 · SW 2.1.1'};
+__impl_initPwaUpdate=function(){if(!('serviceWorker'in navigator))return;navigator.serviceWorker.register('./sw-v200.js?v=2200').then(r=>r.update()).catch(()=>{});navigator.serviceWorker.addEventListener('controllerchange',()=>$('#updateBanner')?.classList.remove('hidden'));if($('#reloadUpdate'))$('#reloadUpdate').onclick=()=>location.reload()};
+__impl_renderVersionStatus=()=>{$('#runtimeStatus').textContent='2.2 · SW 2.2'};
 const y21Settings=__impl_renderSettings;
-__impl_renderSettings=function(){y21Settings();$('#versionInfo').innerHTML=`<code>曆象 2.1.1<br>Build ${BUILD}<br>Data schema ${SCHEMA_VERSION}<br>개인 기록은 이 브라우저에 저장</code>`};
+__impl_renderSettings=function(){y21Settings();$('#versionInfo').innerHTML=`<code>曆象 2.2<br>Build ${BUILD}<br>Data schema ${SCHEMA_VERSION}<br>개인 기록은 이 브라우저에 저장</code>`};

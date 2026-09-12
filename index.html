@@ -7,10 +7,10 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="曆象">
-<link rel="manifest" href="./manifest-v200.webmanifest?v=2110">
+<link rel="manifest" href="./manifest-v200.webmanifest?v=2200">
 <link rel="apple-touch-icon" href="./icon-192.png">
-<link rel="stylesheet" href="./styles-v200.css?v=2110">
-<link rel="stylesheet" href="./styles-v210.css?v=2110">
+<link rel="stylesheet" href="./styles-v200.css?v=2200">
+<link rel="stylesheet" href="./styles-v210.css?v=2200">
 <title>曆象 · 수능 만점 운영체제</title>
 </head>
 <body>
@@ -19,7 +19,7 @@
   <aside class="sidebar">
     <div class="brand">
       <div class="brand-mark" aria-label="역상">曆</div>
-      <div><h1>曆象</h1><span>v2.1.1</span></div>
+      <div><h1>曆象</h1><span>v2.2</span></div>
     </div>
     <nav id="mainNav" aria-label="주 메뉴">
       <button class="active" data-page="dashboard">오늘</button>
@@ -246,7 +246,7 @@
     <!-- TESTS -->
     <section id="tests" class="page">
       <article class="card">
-        <div class="card-head"><div><h3>전과목 현재 상태</h3><div class="micro-label">대표 시험 우선 · 원점수 · 등급 · 시간 안정성 · 반복 오답</div></div><button id="addTestBtn" class="btn primary small">+ 시험</button></div>
+        <div class="card-head"><div><h3>전과목 현재 상태</h3><div class="micro-label">대표 시험 우선 · 원점수 · 등급 · 시간 안정성 · 반복 오답</div></div><div class="row"><label class="btn ghost small file-btn">오답 분석 가져오기<input id="analysisPackageInput" type="file" accept=".json,application/json" hidden></label><button id="exportAnalysisContext" class="btn ghost small">분석용 컨텍스트</button><button id="addTestBtn" class="btn primary small">+ 시험</button></div></div>
         <div id="testSubjectBoard" class="test-subject-board"></div>
         <div id="testAllSubjectSummary" class="test-overview-summary"></div>
       </article>
@@ -265,7 +265,7 @@
             <section class="score-insight-panel"><div class="panel-head"><div><h3>지금의 판단</h3><div class="micro-label">그래프를 할 일로 바꿉니다.</div></div></div><div id="scoreInsight"></div></section>
           </div>
           <div class="score-analysis-grid lower">
-            <section class="question-heat-panel"><div class="panel-head"><div><h3>반복 오답 문항</h3><div class="micro-label">3회 이상 비교 가능한 기록이 쌓인 경우에만 판정합니다.</div></div></div><div id="questionNumberGrid" class="question-number-grid"></div><div id="questionHeatLegend" class="micro-label"></div></section>
+            <section class="question-heat-panel"><div class="panel-head"><div><h3>반복 오답 문항 <small class="title-note">번호 자체는 참고용</small></h3><div class="micro-label">3회 이상 비교 가능한 기록이 쌓인 경우에만 판정합니다.</div></div></div><div id="questionNumberGrid" class="question-number-grid"></div><div id="questionHeatLegend" class="micro-label"></div></section>
             <section class="question-detail-panel"><div class="panel-head"><div><h3>문항·재풀이</h3><div class="micro-label">문항 번호를 누르면 연결된 기록을 봅니다.</div></div></div><div id="questionInsight"></div><div id="reviewQueue" class="review-queue"></div></section>
           </div>
         </div>
@@ -380,6 +380,7 @@
         <article class="card"><h3>최근 7일</h3><div id="recent7Stats" class="mini-stat-grid"></div><h3 class="subhead">최근 학습 공백</h3><div id="analysisGap" class="gap-list"></div></article>
       </div>
       <article class="card"><div class="card-head"><div><h3>오류 패턴</h3></div></div><div id="errorPatternBoard"></div></article>
+      <article class="card"><div class="card-head"><div><h3>오답 분석 아카이브</h3><div class="micro-label">업로드한 과거 오답은 오늘 우선순위에 자동 반영하지 않습니다.</div></div><span id="analysisArchiveBadge" class="badge"></span></div><div id="analysisArchiveBoard"></div></article>
     </section>
 
     <!-- SETTINGS -->
@@ -388,7 +389,7 @@
       <div class="grid g2">
         <article class="card">
           <h3>백업·복원</h3>
-          <div class="row"><button id="exportData" class="btn primary">전체 기록 내보내기</button><label class="btn ghost file-btn">기록 불러오기<input id="importData" type="file" accept=".json,application/json" hidden></label></div>
+          <div class="row"><button id="exportData" class="btn primary">전체 기록 내보내기</button><label class="btn ghost file-btn">기록 병합<input id="importData" type="file" accept=".json,application/json" hidden></label><button id="rollbackAnalysisImport" class="btn ghost">마지막 분석 가져오기 되돌리기</button></div>
         </article>
         <article class="card recovery-card">
           <div class="card-head"><div><h3>기존 데이터 복구</h3><div class="micro-label">브라우저 안의 이전 DB·업데이트 전 안전본을 비교해서 가장 풍부한 기록을 찾습니다.</div></div><button id="scanRecovery" class="btn ghost small">다시 검사</button></div>
@@ -642,10 +643,12 @@
 </div></div>
 
 <div class="modal-back" id="y21MergeModal" role="dialog" aria-modal="true" aria-labelledby="y21MergeTitle"><div class="modal"><h3 id="y21MergeTitle">기록 병합</h3><div id="y21MergeBody"></div><div class="y21-modal-actions"><button class="btn ghost modal-close">취소</button><button class="btn primary" id="y21ApplyMerge">선택대로 병합</button></div></div></div>
-<script src="./boot-v211.js?v=2110" defer></script>
-<script src="./app-v200-core.js?v=2110" defer></script>
-<script src="./app-v200-engine.js?v=2110" defer></script>
-<script src="./app-v200-recovery.js?v=2110" defer></script>
-<script src="./app-v210.js?v=2110" defer></script>
+<div class="modal-back" id="analysisPackageModal" role="dialog" aria-modal="true" aria-labelledby="analysisPackageTitle"><div class="modal wide"><div class="card-head"><div><h3 id="analysisPackageTitle">오답 분석 패키지</h3><div class="micro-label">원본 기록을 덮어쓰지 않고 증분으로 병합합니다.</div></div><button class="btn ghost small modal-close">닫기</button></div><div id="analysisPackagePreview"></div><div class="row end"><button class="btn ghost modal-close">취소</button><button class="btn primary" id="applyAnalysisPackage">가져오기</button></div></div></div>
+<script src="./boot-v220.js?v=2200" defer></script>
+<script src="./app-v200-core.js?v=2200" defer></script>
+<script src="./app-v200-engine.js?v=2200" defer></script>
+<script src="./app-v200-recovery.js?v=2200" defer></script>
+<script src="./app-v210.js?v=2200" defer></script>
+<script src="./app-v220-analysis.js?v=2200" defer></script>
 </body>
 </html>
