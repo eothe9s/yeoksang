@@ -7,10 +7,10 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="曆象">
-<link rel="manifest" href="./manifest-v200.webmanifest?v=2200">
+<link rel="manifest" href="./manifest-v200.webmanifest?v=2300">
 <link rel="apple-touch-icon" href="./icon-192.png">
-<link rel="stylesheet" href="./styles-v200.css?v=2200">
-<link rel="stylesheet" href="./styles-v210.css?v=2200">
+<link rel="stylesheet" href="./styles-v200.css?v=2300">
+<link rel="stylesheet" href="./styles-v210.css?v=2300">
 <title>曆象 · 수능 만점 운영체제</title>
 </head>
 <body>
@@ -68,13 +68,14 @@
           <span>기간 평균 <b id="periodAverageHours">계산 중</b><small id="periodAverageCaption"></small></span>
           <span>완주 <b id="focusTaskCount">0/0</b><small id="todayCompletionCaption"></small></span>
           <span>남은 계획 <b id="focusRemainStudy">0분</b></span>
+          <span id="weeklyOutlook">주간 계산 중</span>
           <span id="sleepGuardMini">수면 규칙 확인 중</span>
         </div>
         <div id="overloadBanner" class="banner hidden"></div><div id="automationConflictBanner" class="banner warn hidden"></div>
       </article>
 
       <article id="sleepGuardCard" class="sleep-guard-card">
-        <div><span class="eyebrow">불가침 규칙</span><b id="sleepGuardTitle">23:00 전 취침</b><p id="sleepGuardDetail">평일 06:30 전 기상 · 주말 기상 목표는 미정</p></div>
+        <div><b id="sleepGuardTitle">23:00 전 취침</b><p id="sleepGuardDetail">평일 06:30 전 기상 · 주말 기상 목표는 미정</p></div>
         <div class="sleep-guard-actions"><span id="sleepGuardState" class="status-chip">기록 확인</span><button class="btn ghost small" data-go="condition">수면 기록</button></div>
       </article>
 
@@ -95,7 +96,7 @@
       <details class="today-more"><summary>오늘 상세 보기</summary>
       <article class="quota-panel"><div class="card-head"><div><h3>오늘 과목별 필요·계획 시간</h3></div><button class="btn ghost small" data-go="progress">분량·종료 기준</button></div><div id="dailyQuotaBySubject"></div></article>
 
-      <article class="decision-panel"><div class="card-head"><div><h3>오늘의 판단</h3></div><span id="decisionConfidence" class="badge">근거 계산 중</span></div><div id="decisionBoard"></div><div id="decisionOverrideState" class="micro-label"></div></article>
+      <article class="decision-panel"><div class="card-head"><div><h3>오늘의 판단</h3></div><div class="row"><button id="reactivationBtn" class="btn ghost small">재가동 3일</button><span id="decisionConfidence" class="badge">계산 중</span></div></div><div id="decisionBoard"></div><div id="decisionOverrideState" class="micro-label"></div></article>
 
       <div class="grid g2 secondary-panels">
         <article class="card"><div class="card-head"><h3>최근 7일 완주</h3><button class="btn ghost small" data-go="month">월간</button></div><div id="completionQuick" class="completion-list"></div></article>
@@ -235,7 +236,7 @@
     <section id="progress" class="page">
       <article class="card pressure-card">
         <div class="card-head"><div><h3>10월 16일까지 남은 과정</h3><div class="micro-label">가능 시간과 필요한 시간을 분리합니다.</div></div><button class="btn ghost small" data-go="vending">학습 자판기</button></div>
-        <div id="curriculumPressure" class="pressure-summary"></div>
+        <div id="curriculumPressure" class="pressure-summary"></div><div id="deadlineRiskBoard" class="deadline-risk-board"></div>
       </article>
       <article class="card">
         <div class="card-head"><div><h3>과정 종료 기준</h3><div class="micro-label">완강과 시험에서 쓸 수 있음을 분리</div></div><span class="badge">수강 · 복습 · 적용 · 시간 내 재현</span></div>
@@ -644,12 +645,12 @@
 
 <div class="modal-back" id="y21MergeModal" role="dialog" aria-modal="true" aria-labelledby="y21MergeTitle"><div class="modal"><h3 id="y21MergeTitle">기록 병합</h3><div id="y21MergeBody"></div><div class="y21-modal-actions"><button class="btn ghost modal-close">취소</button><button class="btn primary" id="y21ApplyMerge">선택대로 병합</button></div></div></div>
 <div class="modal-back" id="analysisPackageModal" role="dialog" aria-modal="true" aria-labelledby="analysisPackageTitle"><div class="modal wide"><div class="card-head"><div><h3 id="analysisPackageTitle">오답 분석 패키지</h3><div class="micro-label">원본 기록을 덮어쓰지 않고 증분으로 병합합니다.</div></div><button class="btn ghost small modal-close">닫기</button></div><div id="analysisPackagePreview"></div><div class="row end"><button class="btn ghost modal-close">취소</button><button class="btn primary" id="applyAnalysisPackage">가져오기</button></div></div></div>
-<script src="./boot-v220.js?v=2200" defer></script>
-<script src="./app-v200-core.js?v=2200" defer></script>
-<script src="./app-v200-engine.js?v=2200" defer></script>
-<script src="./app-v200-recovery.js?v=2200" defer></script>
-<script src="./app-v210.js?v=2200" defer></script>
-<script src="./app-v220-analysis.js?v=2200" defer></script>
-<script src="./app-v221.js?v=2210" defer></script>
+<script src="./boot-v220.js?v=2300" defer></script>
+<script src="./app-v200-core.js?v=2300" defer></script>
+<script src="./app-v200-engine.js?v=2300" defer></script>
+<script src="./app-v200-recovery.js?v=2300" defer></script>
+<script src="./app-v210.js?v=2300" defer></script>
+<script src="./app-v220-analysis.js?v=2300" defer></script>
+<script src="./app-v230.js?v=2300" defer></script>
 </body>
 </html>
