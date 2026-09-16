@@ -316,7 +316,7 @@ function restoreUndo(id){
  const h=undoHistory(),i=h.findIndex(x=>x.id===id);if(i<0)return;
  try{const restored=migrateDB(JSON.parse(h[i].data));const next=JSON.stringify(restored);if(!safeSetItem(DB_KEY,next))throw new Error();DB=restored;LAST_SAVED_JSON=next;safeSetItem('p11122_v60_undo',JSON.stringify(h.filter((_,j)=>j!==i)),{silent:true});viewDate=todayDate();displayMonth=viewDate.slice(0,7);alert('이전 상태로 되돌렸습니다.');renderSettings();navigate('dashboard')}catch{alert('되돌리기에 실패했습니다.')}
 }
-function cleanupTrash(d=DB){const cutoff=Date.now()-7*86400000;d.trash=(d.trash||[]).filter(x=>(x.deletedAt||0)>=cutoff)}
+function cleanupTrash(d=DB){if(!Array.isArray(d.trash))d.trash=[]}
 
 function allLectureCourses(){return [...BUILTIN_LECTURES,...(DB.customLectures||[])]}
 function lectureCourse(key){return allLectureCourses().find(c=>c.key===key)}
@@ -448,13 +448,14 @@ function mergeSchedule(date,old){
   const key=n.baseKey||baseKeyFromBlock(n,date);const o=(old||[]).find(x=>(x.baseKey||baseKeyFromBlock(x,date))===key)||(old||[]).find(x=>x.id===n.id)||(old||[]).find(x=>n.regular&&Number(x.period)===n.period)||(old||[]).find(x=>!n.regular&&((x.name||x.school)===n.name||(`${x.start||''}~${x.end||''}`===`${n.start}~${n.end}`)));
   if(o){used.add(o.id);const q=normalizeBlock(o,date);n.taskIds=q.taskIds;n.taskAllocations=q.taskAllocations||{};n.done=q.done;n.actualMin=q.actualMin;n.locked=n.selfStudy?q.locked:n.locked;if(q.userOverrides){const u=q.userOverrides;n.name=u.name??n.name;n.type=u.type??n.type;n.selfStudy=u.selfStudy??n.selfStudy;n.device=u.device??n.device;n.start=u.start??n.start;n.end=u.end??n.end;n.userOverrides=deep(u)}}
  });
- (old||[]).filter(x=>!used.has(x.id)&&!x.regular&&!x.fixed).forEach(x=>base.push(normalizeBlock(x,date)));
+ // Keep recorded work even if a new fixed constraint removes its old slot.
+ (old||[]).filter(x=>!used.has(x.id)&&((!x.regular&&!x.fixed)||x.done||x.actualMin!=null||(x.taskIds||[]).length||Object.keys(x.taskAllocations||{}).length)).forEach(x=>base.push(normalizeBlock(x,date)));
  return sortBlocks(base)
 }
 function sortBlocks(blocks){
  return [...blocks].sort((a,b)=>{const am=plannerMinute(a.start),bm=plannerMinute(b.start);if(am!=null&&bm!=null)return am-bm||(a.fixed===b.fixed?0:a.fixed?-1:1);if(am==null&&bm==null)return(a.period||99)-(b.period||99);return am==null?-1:1})
 }
-function ensureSchedule(date){const old=Array.isArray(DB.schedules[date])?DB.schedules[date]:[];const merged=mergeSchedule(date,old);DB.schedules[date]=merged;return merged}
+function ensureSchedule(date){const old=Array.isArray(DB.schedules[date])?DB.schedules[date]:[];const merged=mergeSchedule(date,old);if(!globalThis.YEOKSANG_STARTING)DB.schedules[date]=merged;return merged}
 function saveSchedule(date,blocks){DB.schedules[date]=sortBlocks(blocks.map(x=>normalizeBlock(x,date)));saveDB()}
 function scheduleTemplateBlocksFromDate(date){return ensureSchedule(date).map(b=>({name:b.name,type:b.type,selfStudy:Boolean(b.selfStudy),device:Boolean(b.selfStudy&&b.device),start:b.start||'',end:b.end||'',locked:Boolean(b.locked)}))}
 function setDayScheduleMode(date,mode,templateId=null,{confirmChange=true}={}){

@@ -26,3 +26,8 @@
 .archive-q-main{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}.archive-q-main .text-link{font-size:11px;color:#a45b67}
 .score-point.historical circle{opacity:.72}
 @media(max-width:900px){.deadline-risk-row{grid-template-columns:1fr auto}.hero-subline.v2-subline{grid-template-columns:repeat(2,minmax(0,1fr))}}
+/* 2.3.1: reuse existing compact cards; replanning details stay collapsed. */
+.y231-replan{margin-top:12px;font-size:12px}
+.y231-replan-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:8px 0;border-bottom:1px solid var(--line,#e5e9ef)}
+.y231-replan-row small{display:block;color:var(--muted,#65748a);margin-top:3px}
+.y231-replan-row .btn,.deadline-risk-row .btn{flex-shrink:0}
