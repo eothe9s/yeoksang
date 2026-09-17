@@ -1,9 +1,9 @@
 /* 曆象 v2 · 수능 만점 운영체제 */
 'use strict';
 
-const APP_VERSION='2.1';
+const APP_VERSION='2.4';
 const SCHEMA_VERSION=14;
-const BUILD='2026-09-10-v2.1';
+const BUILD='2026-09-17-v2.4';
 const EXAM9='2026-09-02';
 const CSAT='2026-11-19';
 const SUBJECTS=['국어','수학','영어','사회문화','경제'];
@@ -136,8 +136,8 @@ const PRIORITY_LABEL={must:'필수',should:'권장',extra:'여유'};
 const ERROR_CAUSES=['시간 부족','개념 부족','계산 실수','문제 해석','부주의','찍음'];
 const TEST_SOURCES=['평가원 모의평가','교육청 학력평가','수능','사설 모의고사','학교 모의고사','단원·과목 실모','기타'];
 const TEST_SOURCE_LABELS={'평가원 모의평가':'평가원 모의평가 (모평)','교육청 학력평가':'교육청 학력평가 (학평)'};
-const TEST_SCOPES=['full','partial','unit'];
-const TEST_SCOPE_LABELS={full:'전범위',partial:'부분 범위',unit:'단원·유형'};
+const TEST_SCOPES=['full','partial','unit','unknown'];
+const TEST_SCOPE_LABELS={full:'전범위',partial:'부분 범위',unit:'단원·유형',unknown:'범위 미정'};
 const QUESTION_LIMITS={국어:45,수학:30,영어:45,사회문화:20,경제:20};
 const QUESTION_STATUS_LABELS={wrong:'틀림',uncertain:'애매하지만 맞음'};
 
@@ -362,7 +362,7 @@ function removeTask(date,id,toTrash=true){
  if(toTrash)trashPush('task',t,{date});saveDB()
 }
 function moveTaskToWaiting(date,id,{recordMove=true}={}){
- const t=taskById(date,id);if(!t)return;if(recordMove)recordTransferredTask(date,t,'waiting');removeTask(date,id,false);const x=deep(t);x.waitingSince=date;x.done=(x.components||[]).every(c=>c.done);DB.waiting.push(x);saveDB()
+ const t=taskById(date,id);if(!t)return;if(recordMove)recordTransferredTask(date,t,'waiting');removeTask(date,id,false);const x=deep(t);x.waitingSince=date;x.done=(x.components||[]).length?x.components.every(c=>c.done):Boolean(t.done);DB.waiting.push(x);saveDB()
 }
 function taskUnitSnapshot(t){
  const lectures=(t.components||[]).filter(c=>c.kind==='lecture');
@@ -1434,7 +1434,7 @@ function openCloseDay__impl1(){
 function nextDate(date){const d=parseDate(date);d.setDate(d.getDate()+1);return ymd(d)}
 function confirmCloseDay__impl1(){
  const previous=dailyRecord(viewDate);if(previous?.closedAt&&!confirm('이미 마감한 날짜입니다. 현재 상태로 마감 기록을 다시 저장할까요?'))return;
- const v=Number($('#closeStudyOverride').value);if(Number.isFinite(v)&&v>=0)DB.studyOverrides[viewDate]=Math.round(v*60);
+ const rawStudy=$('#closeStudyOverride').value;const v=Number(rawStudy);if(rawStudy!==''&&Number.isFinite(v)&&v>=0)DB.studyOverrides[viewDate]=Math.round(v*60);
  const before=deep(tasksFor(viewDate)),units=snapshotTaskUnits(before),actions=$$('.close-action').map(x=>({id:x.dataset.id,act:x.value})),tom=nextDate(viewDate);
  const carriedBefore=previous?.closedAt?0:(Number(previous?.carried)||0),waitingBefore=previous?.closedAt?0:(Number(previous?.waiting)||0),movedTotal=previous?.closedAt?0:(Number(previous?.movedTotal)||0),movedDone=previous?.closedAt?0:(Number(previous?.movedDone)||0),movedTasks=previous?.closedAt?0:(Number(previous?.movedTasks)||0),movedDoneTasks=previous?.closedAt?0:(Number(previous?.movedDoneTasks)||0);
  let carried=0,waiting=0,skipped=0;
