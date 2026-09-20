@@ -201,7 +201,7 @@ __impl_initPwaUpdate=function(){
  const askVersion=()=>navigator.serviceWorker.controller?.postMessage({type:'GET_VERSION'});
  navigator.serviceWorker.addEventListener('message',e=>{if(e.data?.type==='SW_VERSION'){globalThis.YEOKSANG_SW_VERSION=e.data.version;renderVersionStatus();}});
  navigator.serviceWorker.addEventListener('controllerchange',()=>{askVersion();if(applying)location.reload();});
- navigator.serviceWorker.register('./sw-v200.js?v=2500').then(reg=>{
+ navigator.serviceWorker.register('./sw-v200.js?v=2501').then(reg=>{
   registration=reg;askVersion();if(reg.waiting&&navigator.serviceWorker.controller)$('#updateBanner')?.classList.remove('hidden');
   reg.addEventListener('updatefound',()=>{const worker=reg.installing;if(worker)worker.addEventListener('statechange',()=>{if(worker.state==='installed'&&navigator.serviceWorker.controller)$('#updateBanner')?.classList.remove('hidden');});});
   reg.update().catch(()=>{});

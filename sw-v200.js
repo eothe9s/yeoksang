@@ -1,6 +1,6 @@
-const VERSION='2.5';
-const CACHE='yeoksang-v2-5-20260918';
-const ASSETS=['./index.html?v=2500','./boot-v220.js?v=2500','./recovery.html?v=2500','./styles-v200.css?v=2500','./styles-v210.css?v=2500','./styles-v240.css?v=2500','./app-v200-core.js?v=2500','./app-v200-engine.js?v=2500','./app-v200-recovery.js?v=2500','./app-v210.js?v=2500','./app-v220-analysis.js?v=2500','./app-v230.js?v=2500','./app-v231.js?v=2500','./app-v240.js?v=2500','./record-safety.js?v=2500','./view-tools.js?v=2500','./manifest-v200.webmanifest?v=2500','./icon-192.png','./icon-512.png'];
+const VERSION='2.5.1';
+const CACHE='yeoksang-v2-5-1-20260920';
+const ASSETS=['./index.html?v=2501','./boot-v220.js?v=2501','./recovery.html?v=2501','./styles-v200.css?v=2501','./styles-v210.css?v=2501','./styles-v240.css?v=2501','./app-v200-core.js?v=2501','./app-v200-engine.js?v=2501','./app-v200-recovery.js?v=2501','./app-v210.js?v=2501','./app-v220-analysis.js?v=2501','./app-v230.js?v=2501','./app-v231.js?v=2501','./app-v240.js?v=2501','./record-safety.js?v=2501','./view-tools.js?v=2501','./manifest-v200.webmanifest?v=2501','./icon-192.png','./icon-512.png'];
 self.addEventListener('install',event=>{
  event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(ASSETS)).catch(async error=>{await caches.delete(CACHE);throw error;}));
 });
@@ -22,7 +22,7 @@ self.addEventListener('fetch',event=>{
  event.respondWith((async()=>{
   const cache=await caches.open(CACHE);
   if(event.request.mode==='navigate'&&!url.pathname.endsWith('recovery.html')){
-   const page=await cache.match('./index.html?v=2500');if(page)return page;
+   const page=await cache.match('./index.html?v=2501');if(page)return page;
   }
   const cached=await cache.match(event.request);if(cached)return cached;
   try{return await fetch(event.request)}catch{return Response.error()}

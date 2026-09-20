@@ -663,13 +663,13 @@ label{font-size:9.5px!important;}
   background:#f3f6fa!important;box-shadow:none!important;
 }
 .hero-metrics.v2-metrics .hero-metric.primary{background:#eef3fb!important;border-color:#dfe7f3!important;}
-.hero-metrics.v2-metrics .hero-metric span,.hero-metrics.v2-metrics .hero-metric small{font-size:8.2px!important;line-height:1.3!important;color:#526077!important;}
+.hero-metrics.v2-metrics .hero-metric span,.hero-metrics.v2-metrics .hero-metric small{font-size:8.2px!important;line-height:1.3!important;color:#858e9e!important;}
 .hero-metrics.v2-metrics .hero-metric b{font-size:16px!important;margin:5px 0 2px!important;line-height:1.17!important;letter-spacing:-.035em!important;}
 .hero-metrics.v2-metrics .hero-metric.primary b{font-size:17px!important;color:#365a91!important;}
 .hero-metrics.v2-metrics .hero-metric.focus-metric b{font-size:15px!important;}
 .hero-subline.v2-subline{
   display:flex!important;align-items:center!important;gap:13px!important;flex-wrap:wrap!important;
-  padding:8px 2px 0!important;font-size:8.4px!important;color:#526077!important;
+  padding:8px 2px 0!important;font-size:8.4px!important;color:#858e9e!important;
 }
 .hero-subline.v2-subline>span:not([hidden]){display:inline-flex!important;align-items:baseline!important;gap:4px!important;white-space:nowrap!important;}
 .hero-subline.v2-subline b{font-size:9px!important;color:#596477!important;}
