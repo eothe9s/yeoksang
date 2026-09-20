@@ -1,15 +1,18 @@
 /* 曆象 v2 · 수능 만점 운영체제 */
 'use strict';
 
-const APP_VERSION='2.4';
+const APP_VERSION='2.5';
 const SCHEMA_VERSION=14;
-const BUILD='2026-09-17-v2.4';
+const BUILD='2026-09-18-v2.5';
 const EXAM9='2026-09-02';
 const CSAT='2026-11-19';
 const SUBJECTS=['국어','수학','영어','사회문화','경제'];
 const GOAL9={'국어':1,'수학':1,'영어':1,'사회문화':2,'경제':2};
 const GOAL_CSAT={'국어':1,'수학':1,'영어':1,'사회문화':1,'경제':1};
 const DB_KEY='p11122_v60_db';
+let renderMemo=null;
+function memoDuringRender(key,calculate){if(!renderMemo)return calculate();if(!renderMemo.has(key))renderMemo.set(key,calculate());return renderMemo.get(key);}
+function renderScope(render){if(renderMemo)return render();renderMemo=new Map();try{return render()}finally{renderMemo=null;if(typeof polishView==='function')polishView();}}
 
 /* v2 single public dispatch surface: compatibility layers have unique internal names. */
 let __impl_activeStage=activeStage__impl1;
@@ -23,13 +26,13 @@ function baseSchedule(...args){return __impl_baseSchedule.apply(this,args)}
 let __impl_bindEvents=bindEvents__impl1;
 function bindEvents(...args){return __impl_bindEvents.apply(this,args)}
 let __impl_capacityHoursFor=capacityHoursFor__impl1;
-function capacityHoursFor(...args){return __impl_capacityHoursFor.apply(this,args)}
+function capacityHoursFor(...args){return memoDuringRender('capacity:'+args.join('|'),()=>__impl_capacityHoursFor.apply(this,args))}
 let __impl_capacitySummaryV90=capacitySummaryV90__impl1;
-function capacitySummaryV90(...args){return __impl_capacitySummaryV90.apply(this,args)}
+function capacitySummaryV90(...args){return memoDuringRender('capacitySum:'+args.join('|'),()=>__impl_capacitySummaryV90.apply(this,args))}
 let __impl_confirmCloseDay=confirmCloseDay__impl1;
 function confirmCloseDay(...args){return __impl_confirmCloseDay.apply(this,args)}
 let __impl_curriculumLoadV90=curriculumLoadV90__impl1;
-function curriculumLoadV90(...args){return __impl_curriculumLoadV90.apply(this,args)}
+function curriculumLoadV90(...args){return memoDuringRender('curriculum:'+args.join('|'),()=>__impl_curriculumLoadV90.apply(this,args))}
 let __impl_errorPatternStats=errorPatternStats__impl1;
 function errorPatternStats(...args){return __impl_errorPatternStats.apply(this,args)}
 let __impl_importData=importData__impl1;
@@ -39,7 +42,7 @@ function initPwaUpdate(...args){return __impl_initPwaUpdate.apply(this,args)}
 let __impl_masteryChips=masteryChips__impl1;
 function masteryChips(...args){return __impl_masteryChips.apply(this,args)}
 let __impl_navigate=navigate__impl1;
-function navigate(...args){return __impl_navigate.apply(this,args)}
+function navigate(...args){return renderScope(()=>__impl_navigate.apply(this,args))}
 let __impl_normalizeQuestionRecord=normalizeQuestionRecord__impl1;
 function normalizeQuestionRecord(...args){return __impl_normalizeQuestionRecord.apply(this,args)}
 let __impl_normalizeTestRecord=normalizeTestRecord__impl1;
@@ -63,21 +66,21 @@ function renderCondition(...args){return __impl_renderCondition.apply(this,args)
 let __impl_renderConditionAnalysis=renderConditionAnalysis__impl1;
 function renderConditionAnalysis(...args){return __impl_renderConditionAnalysis.apply(this,args)}
 let __impl_renderDashboard=renderDashboard__impl1;
-function renderDashboard(...args){return __impl_renderDashboard.apply(this,args)}
+function renderDashboard(...args){return renderScope(()=>__impl_renderDashboard.apply(this,args))}
 let __impl_renderErrorPatterns=renderErrorPatterns__impl1;
 function renderErrorPatterns(...args){return __impl_renderErrorPatterns.apply(this,args)}
 let __impl_renderGoals=renderGoals__impl1;
 function renderGoals(...args){return __impl_renderGoals.apply(this,args)}
 let __impl_renderProgress=renderProgress__impl1;
-function renderProgress(...args){return __impl_renderProgress.apply(this,args)}
+function renderProgress(...args){return renderScope(()=>__impl_renderProgress.apply(this,args))}
 let __impl_renderProtocolBoard=renderProtocolBoard__impl1;
 function renderProtocolBoard(...args){return __impl_renderProtocolBoard.apply(this,args)}
 let __impl_renderSettings=renderSettings__impl1;
-function renderSettings(...args){return __impl_renderSettings.apply(this,args)}
+function renderSettings(...args){return renderScope(()=>__impl_renderSettings.apply(this,args))}
 let __impl_renderStabilityBoard=renderStabilityBoard__impl1;
 function renderStabilityBoard(...args){return __impl_renderStabilityBoard.apply(this,args)}
 let __impl_renderTests=renderTests__impl1;
-function renderTests(...args){return __impl_renderTests.apply(this,args)}
+function renderTests(...args){return renderScope(()=>__impl_renderTests.apply(this,args))}
 let __impl_renderVersionStatus=renderVersionStatus__impl1;
 function renderVersionStatus(...args){return __impl_renderVersionStatus.apply(this,args)}
 let __impl_renderWeeklyCommand=renderWeeklyCommand__impl1;
@@ -93,7 +96,14 @@ function saveCondition(...args){return __impl_saveCondition.apply(this,args)}
 let __impl_saveCourseMeta=saveCourseMeta__impl1;
 function saveCourseMeta(...args){return __impl_saveCourseMeta.apply(this,args)}
 let __impl_saveDB=saveDB__impl1;
-function saveDB(...args){return __impl_saveDB.apply(this,args)}
+function saveDB(...args){
+ if(globalThis.YEOKSANG_STARTING)return false;
+ if(SAVE_TRANSACTION_DEPTH)return true;
+ if(renderMemo)renderMemo.clear();
+ const ok=__impl_saveDB.apply(this,args);
+ if(!ok){const e=new Error('변경을 저장하지 못했습니다.');e.name='YeoksangSaveError';throw e}
+ return true;
+}
 let __impl_saveLectureModal=saveLectureModal__impl1;
 function saveLectureModal(...args){return __impl_saveLectureModal.apply(this,args)}
 let __impl_saveSleepModal=saveSleepModal__impl1;
@@ -215,7 +225,7 @@ function normalizeImportedTask(t){
  }else{
   x.components=[{id:uid(),kind:'manual',label:x.name,done:Boolean(t.done)}]
  }
- x.done=x.components.length?x.components.every(c=>c.done):Boolean(t.done);
+ x.done=t.deferred||t.actualStatus==='partial'||t.actualStatus==='unstarted'?false:(x.components.length?x.components.every(c=>c.done):Boolean(t.done));
  return x
 }
 function parseQuestionNumbers(value){
@@ -256,7 +266,18 @@ function normalizeTestRecord__impl1(t){
 globalThis.YEOKSANG_STARTING=true;
 function safeSetItem(key,value,{silent=false}={}){
  if(globalThis.YEOKSANG_STARTING)return false;
- try{localStorage.setItem(key,value);return true}catch(e){if(!silent){globalThis.y211ShowRecovery?.('저장 실패 ('+e.name+'). 이번 변경은 저장되지 않았습니다. 원본과 미저장 기록을 각각 내보내 주세요.');if(!safeSetItem.warned){safeSetItem.warned=true;setTimeout(()=>alert('이번 변경을 저장하지 못했습니다. 원본과 미저장 기록을 내보내 주세요. 웹사이트 데이터는 지우지 마세요.'),0)}}return false}
+ try{
+  if(key===DB_KEY){
+   if(globalThis.YEOKSANG_WRITER===false||localStorage.getItem(DB_KEY)!==LAST_PERSISTED_RAW){const e=new Error('다른 탭의 기록을 덮어쓰지 않습니다. 다른 탭을 닫고 원본·미저장본을 내보낸 뒤 다시 병합하세요.');e.name='StorageConflictError';throw e}
+  }
+  localStorage.setItem(key,value);
+  if(key===DB_KEY)LAST_PERSISTED_RAW=value;
+  return true;
+ }catch(e){
+  if(key===DB_KEY){globalThis.YEOKSANG_FAILED_RAW=String(value);globalThis.YEOKSANG_SAVE_ERROR=e.name;}
+  if(!silent)globalThis.y211ShowRecovery?.(e.name==='StorageConflictError'?e.message:'저장 실패 ('+e.name+'). 이번 변경은 저장되지 않았습니다. 원본과 미저장 기록을 각각 내보내 주세요.');
+  return false;
+ }
 }
 function approximateStorageBytes(){let n=0;try{for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i)||'',v=localStorage.getItem(k)||'';n+=(k.length+v.length)*2}}catch{}return n}
 function automationRunKey(ruleId,date){return `${ruleId}:${date}`}
@@ -305,16 +326,24 @@ function loadDB(){
 }
 let DB=loadDB();
 let LAST_SAVED_JSON=JSON.stringify(DB);
+let LAST_PERSISTED_RAW=globalThis.YEOKSANG_ORIGINAL_RAW??null;
+let SAVE_TRANSACTION_DEPTH=0;
+function commitChange(change){
+ if(SAVE_TRANSACTION_DEPTH){change();return true}
+ const before=deep(DB);SAVE_TRANSACTION_DEPTH++;
+ try{change();SAVE_TRANSACTION_DEPTH--;saveDB();return true}
+ catch(e){SAVE_TRANSACTION_DEPTH=0;DB=before;if(e.name==='YeoksangSaveError')return false;throw e}
+}
 function undoHistory(){try{return JSON.parse(localStorage.getItem('p11122_v60_undo')||'[]')}catch{return[]}}
 function saveDB__impl1(options={}){
  const next=JSON.stringify(DB);if(next===LAST_SAVED_JSON)return true;
  if(!safeSetItem(DB_KEY,next))return false;
- if(options.undo!==false&&LAST_SAVED_JSON){const size=approximateStorageBytes();if(size<3.8*1024*1024){const h=undoHistory();h.unshift({id:uid(),at:Date.now(),data:LAST_SAVED_JSON});safeSetItem('p11122_v60_undo',JSON.stringify(h.slice(0,5)),{silent:true})}}
+ // No whole-DB shadow copies in localStorage. Old copies remain until explicit export/cleanup.
  LAST_SAVED_JSON=next;return true
 }
 function restoreUndo(id){
  const h=undoHistory(),i=h.findIndex(x=>x.id===id);if(i<0)return;
- try{const restored=migrateDB(JSON.parse(h[i].data));const next=JSON.stringify(restored);if(!safeSetItem(DB_KEY,next))throw new Error();DB=restored;LAST_SAVED_JSON=next;safeSetItem('p11122_v60_undo',JSON.stringify(h.filter((_,j)=>j!==i)),{silent:true});viewDate=todayDate();displayMonth=viewDate.slice(0,7);alert('이전 상태로 되돌렸습니다.');renderSettings();navigate('dashboard')}catch{alert('되돌리기에 실패했습니다.')}
+ try{y21OpenMerge(JSON.parse(h[i].data))}catch{alert('안전본을 읽지 못했습니다. 현재 기록은 유지됩니다.')}
 }
 function cleanupTrash(d=DB){if(!Array.isArray(d.trash))d.trash=[]}
 
@@ -339,11 +368,15 @@ function syncComponentSource(c,done){
 }
 function setTaskDoneInternal(date,id,done){
  const t=taskById(date,id);if(!t)return;
+ retainDailyBasis(date);
+ if(t.deferred){DB.waiting=DB.waiting.filter(w=>w.origin?.date!==date||w.origin?.id!==id);delete t.deferred;}
+ delete t.actualStatus;
  (t.components||[]).forEach(c=>syncComponentSource(c,done));t.done=Boolean(done);
  saveDB()
 }
 function setTaskComponentDone(date,id,cid,done){
  const t=taskById(date,id);if(!t)return;const c=(t.components||[]).find(x=>x.id===cid);if(!c)return;
+ retainDailyBasis(date);if(t.deferred){DB.waiting=DB.waiting.filter(w=>w.origin?.date!==date||w.origin?.id!==id);delete t.deferred;}delete t.actualStatus;
  syncComponentSource(c,done);t.done=(t.components||[]).length?(t.components||[]).every(x=>x.done):Boolean(done);
  saveDB()
 }
@@ -357,14 +390,30 @@ function setBlockDone(date,blockId,done){
 function addTask__impl1(date,t){const x=normalizeImportedTask({...t,id:t.id||uid(),done:false});tasksFor(date).push(x);saveDB();return x}
 function removeTask(date,id,toTrash=true){
  const list=tasksFor(date),t=list.find(x=>x.id===id);if(!t)return;
+ retainDailyBasis(date);
  ensureSchedule(date).forEach(b=>{b.taskIds=(b.taskIds||[]).filter(x=>x!==id);if(b.taskAllocations)delete b.taskAllocations[id]});
  DB.tasks[date]=list.filter(x=>x.id!==id);
- if(toTrash)trashPush('task',t,{date});saveDB()
+ if(toTrash){trashPush('task',t,{date});DB.deletedTasks=DB.deletedTasks||{};DB.deletedTasks[id]={date,at:Date.now()};}
+ saveDB()
 }
 function moveTaskToWaiting(date,id,{recordMove=true}={}){
- const t=taskById(date,id);if(!t)return;if(recordMove)recordTransferredTask(date,t,'waiting');removeTask(date,id,false);const x=deep(t);x.waitingSince=date;x.done=(x.components||[]).length?x.components.every(c=>c.done):Boolean(t.done);DB.waiting.push(x);saveDB()
+ const t=taskById(date,id);if(!t||t.done)return false;
+ if(DB.waiting.some(w=>w.origin?.date===date&&w.origin?.id===id))return true;
+ return commitChange(()=>{
+  retainDailyBasis(date);const units=taskUnitSnapshot(t),x=deep(t);
+  x.id=uid();x.origin={date,id};x.waitingSince=date;x.done=false;delete x.deferred;
+  t.deferred={kind:'waiting',queueId:x.id,units,at:Date.now()};t.done=false;
+  DB.waiting.push(x);
+ });
+}
+function retainDailyBasis(date){
+ const r=DB.dailyRecords[date];if(r?.basis==='retained-v25')return;
+ const live=snapshotTaskUnits(DB.tasks[date]||[]),closed=r?.closedAt||r?.state==='closed';
+ DB.dailyRecords[date]={...(r||{}),date,basis:'retained-v25',state:r?.state||'open',legacyTotal:closed?Math.max(0,(r.total||0)-live.total):Number(r?.movedTotal)||0,legacyDone:closed?Math.max(0,(r.done||0)-live.done):Number(r?.movedDone)||0};
 }
 function taskUnitSnapshot(t){
+ if(t.deferred?.units)return {...t.deferred.units};
+ if(t.actualStatus==='partial'||t.actualStatus==='unstarted')return{total:1,done:0};
  const lectures=(t.components||[]).filter(c=>c.kind==='lecture');
  if(lectures.length)return{total:lectures.length,done:lectures.filter(c=>c.done).length};
  return{total:1,done:t.done?1:0}
@@ -382,6 +431,10 @@ function recordTransferredTask(date,t,kind){
 }
 function dailyCompletion(date){
  const record=dailyRecord(date),today=todayDate();
+ if(record?.basis==='retained-v25'){
+  const list=DB.tasks[date]||[],live=snapshotTaskUnits(list),total=live.total+(record.legacyTotal||0),done=Math.min(total,live.done+(record.legacyDone||0)),remaining=kind=>list.filter(t=>t.deferred?.kind===kind).reduce((n,t)=>{const u=taskUnitSnapshot(t);return n+u.total-u.done},0);
+  return{state:date>today?'future':record.closedAt?'closed':date===today?'live':'unclosed',total,done:date>today?0:done,rate:date>today?null:total?Math.round(done/total*100):null,carried:remaining('carry'),waiting:remaining('waiting'),skipped:remaining('skip')};
+ }
  if(record?.closedAt||record?.state==='closed')return{state:'closed',total:record.total||0,done:record.done||0,rate:record.total?Math.round(record.done/record.total*100):0,carried:record.carried||0,waiting:record.waiting||0,skipped:record.skipped||0};
  const live=snapshotTaskUnits(DB.tasks[date]||[]),movedTotal=Number(record?.movedTotal)||0,movedDone=Number(record?.movedDone)||0,total=live.total+movedTotal,done=live.done+movedDone,carry=Number(record?.carried)||0,waiting=Number(record?.waiting)||0;
  if(date===today)return{state:'live',total,done,rate:total?Math.round(done/total*100):0,carried:carry,waiting,skipped:0};
@@ -389,7 +442,14 @@ function dailyCompletion(date){
  return{state:'unclosed',total,done,rate:total?Math.round(done/total*100):null,carried:carry,waiting,skipped:0}
 }
 function carryTaskToDate(t,date){
- const x=deep(t);x.id=uid();x.waitingSince='';x.done=(x.components||[]).length?(x.components||[]).every(c=>c.done):Boolean(x.done);tasksFor(date).push(x);return x
+ const original=t.origin&&taskById(t.origin.date,t.origin.id);
+ if(original&&t.origin.date===date){delete original.deferred;return original;}
+ const existing=tasksFor(date).find(x=>x.queueSourceId===t.id);if(existing)return existing;
+ const x=deep(t);x.id=uid();x.queueSourceId=t.id;x.waitingSince='';x.done=false;delete x.deferred;delete x.actualStatus;
+ if(x.components?.some(c=>!c.done))x.components=x.components.filter(c=>!c.done);
+ tasksFor(date).push(x);
+ if(original)original.deferred={...(original.deferred||{}),kind:'carry',targetDate:date,units:taskUnitSnapshot(original)};
+ return x;
 }
 
 function scheduleModeFor(date){
@@ -481,14 +541,24 @@ function plannedStudy(date){
  return{minutes,unknown}
 }
 function autoActualStudy(date){
- let minutes=0;
- ensureSchedule(date).filter(b=>b.selfStudy).forEach(b=>{
-  if(b.actualMin!=null&&b.actualMin!=='')minutes+=Math.max(0,Number(b.actualMin)||0);
-  else if(b.done)minutes+=blockDuration(b)
- });
- return Math.round(minutes)
+ const intervals=[];let unplaced=0;
+ for(const b of ensureSchedule(date).filter(b=>b.selfStudy)){
+  const minutes=b.actualMin!=null&&b.actualMin!==''?Math.max(0,Number(b.actualMin)||0):b.done?blockDuration(b):0;
+  if(!minutes)continue;
+  const start=b.start?plannerMinute(b.start):null;
+  if(start!=null)intervals.push([start,start+minutes]);else unplaced+=minutes;
+ }
+ intervals.sort((a,b)=>a[0]-b[0]);let minutes=unplaced,last=-1;
+ for(const [a,b] of intervals){minutes+=Math.max(0,b-Math.max(last,a));last=Math.max(last,b)}
+ return Math.round(minutes);
 }
-function finalStudy(date){return DB.studyOverrides[date]!=null?Number(DB.studyOverrides[date]):autoActualStudy(date)}
+function studyTotal(date){
+ if(DB.studyOverrides[date]!=null)return{minutes:Number(DB.studyOverrides[date]),source:'직접 확정'};
+ const entries=Object.values(DB.dayWork?.[date]?.entries||{}),actual=entries.filter(r=>r.actual?.minutes!=null);
+ if(actual.length)return{minutes:actual.reduce((n,r)=>n+Math.max(0,Number(r.actual.minutes)||0),0),source:'할 일 실적 · '+actual.length+'/'+entries.length+'개 시간 입력'};
+ return{minutes:autoActualStudy(date),source:'시간표 기준 추정'};
+}
+function finalStudy(date){return studyTotal(date).minutes}
 function readPlanMeta(date){return DB.plannerMeta?.[date]||{bed:'',wake:''}}
 function planMeta(date){if(!DB.plannerMeta)DB.plannerMeta={};return DB.plannerMeta[date]||(DB.plannerMeta[date]={bed:'',wake:''})}
 function sleepSession(date){
@@ -618,13 +688,26 @@ let plannerSleepMode=false;
 const taskDetailOpen=new Set();
 const selectedQuestionBySubject={};
 
-function showModal(id){$('#'+id)?.classList.add('show')}
-function hideModal(id){$('#'+id)?.classList.remove('show')}
+const modalStates=new Map();
+function modalFocusables(modal){return [...modal.querySelectorAll('button:not([disabled]),a[href],input:not([disabled]):not([type="hidden"]),select:not([disabled]),textarea:not([disabled]),[tabindex="0"]')].filter(el=>el.getClientRects?.().length);}
+function updateModalBackground(){const open=$$('.modal-back.show'),top=open.at(-1);$$('.app-shell,.modal-back').forEach(el=>{el.inert=!!top&&el!==top;});}
+function showModal(id){
+ const el=$('#'+id);if(!el)return;modalStates.set(id,{returnTo:document.activeElement,dirty:false});
+ el.setAttribute('role','dialog');el.setAttribute('aria-modal','true');el.setAttribute('aria-label',el.querySelector('h3,h2')?.textContent||'편집');el.setAttribute('tabindex','-1');
+ el.classList.add('show');updateModalBackground();(modalFocusables(el)[0]||el).focus?.();
+}
+function hideModal(id){const el=$('#'+id),state=modalStates.get(id);el?.classList.remove('show');modalStates.delete(id);updateModalBackground();if(state?.returnTo?.isConnected)state.returnTo.focus?.();}
+function requestModalClose(id){if(modalStates.get(id)?.dirty&&!confirm('저장하지 않은 입력을 닫을까요?'))return false;hideModal(id);return true;}
+function modalKeydown(e){
+ const top=$$('.modal-back.show').at(-1);if(!top)return;
+ if(e.key==='Escape'){e.preventDefault();requestModalClose(top.id);}
+ if(e.key==='Tab'){const items=modalFocusables(top),first=items[0],last=items.at(-1);if(!first){e.preventDefault();top.focus();return;}if(e.shiftKey&&(document.activeElement===first||!top.contains(document.activeElement))){e.preventDefault();last.focus();}else if(!e.shiftKey&&(document.activeElement===last||!top.contains(document.activeElement))){e.preventDefault();first.focus();}}
+}
 function navigate__impl1(page){
  if(page==='week')weekViewStart=mondayOf(viewDate);
  $$('.page').forEach(p=>p.classList.toggle('active',p.id===page));
  $$('#mainNav button').forEach(b=>b.classList.toggle('active',b.dataset.page===page));
- const btn=$(`#mainNav button[data-page="${page}"]`);
+ const btn=$(`#mainNav button[data-page="${esc(page)}"]`);
  $('#pageTitle').textContent=btn?btn.textContent:(page==='settings'?'설정·백업':'曆象');
  renderPage(page)
 }
@@ -657,8 +740,8 @@ function renderDashboard__impl1(){
  $('#togglePlanLock').textContent=DB.planLocks[viewDate]?'계획 잠금 해제':'오늘 계획 확정';
  $('#focusTaskCount').textContent=`${units.done}/${units.total}`;
  const cb=currentBlock(viewDate),nb=nextBlock(viewDate);
- const nowTask=cb?(cb.taskIds||[]).map(id=>taskById(viewDate,id)).find(t=>t&&!t.done):null;
- const nextTask=nowTask||((nb?.taskIds||[]).map(id=>taskById(viewDate,id)).find(t=>t&&!t.done))||tasks.find(t=>!t.done);
+ const nowTask=cb?(cb.taskIds||[]).map(id=>taskById(viewDate,id)).find(t=>t&&!t.done&&!t.deferred):null;
+ const nextTask=nowTask||((nb?.taskIds||[]).map(id=>taskById(viewDate,id)).find(t=>t&&!t.done&&!t.deferred))||tasks.find(t=>!t.done&&!t.deferred);
  $('#focusNowTask').textContent=nextTask?.name||'아직 없음';
  $('#focusCurrentBlock').textContent=cb?.name||(viewDate===todayDate()?'현재 블록 없음':'선택 날짜');
  $('#focusRemainStudy').textContent=minuteLabel(remainingStudyToday(viewDate));
@@ -680,7 +763,7 @@ function renderCompletionQuick(){
  box.innerHTML=dates.map(d=>{const x=dailyCompletion(d),label=x.state==='closed'?`${x.done}/${x.total} · ${x.rate}%`:x.state==='live'?`${x.done}/${x.total} · 진행 ${x.rate}%`:x.state==='future'?(x.total?`계획 ${x.total}`:'계획 없음'):x.total?`${x.done}/${x.total} · ${x.rate}%`:'기록 없음';const note=x.state==='closed'&&(x.carried||x.waiting)?`이월 ${x.carried+x.waiting}`:x.state==='closed'?'마감 완료':x.state==='live'?'오늘 진행':x.state==='unclosed'&&x.total?`미마감 · 이월 ${x.carried+x.waiting}`:'숫자 미집계';return `<div class="completion-row ${x.state}"><b>${d.slice(5).replace('-','.')}</b><span>${label}</span><small>${note}</small></div>`}).join('')
 }
 function renderOverload(){
- const tasks=tasksFor(viewDate).filter(t=>!t.done),known=tasks.reduce((s,t)=>s+(Number(t.minutes)||0),0),unknown=tasks.filter(t=>!Number(t.minutes)).length,p=plannedStudy(viewDate).minutes;
+ const tasks=tasksFor(viewDate).filter(t=>!t.done&&!t.deferred),known=tasks.reduce((s,t)=>s+(Number(t.minutes)||0),0),unknown=tasks.filter(t=>!Number(t.minutes)).length,p=plannedStudy(viewDate).minutes;
  const el=$('#overloadBanner');
  if(known>p&&p>0){el.classList.remove('hidden');el.innerHTML=`오늘 할 일 예상 ${minuteLabel(known)} / 시간표상 자습 ${minuteLabel(p)}. <b>${minuteLabel(known-p)} 초과</b>${unknown?` · 시간 미입력 ${unknown}개 별도`:''}`}
  else el.classList.add('hidden')
@@ -720,16 +803,16 @@ function renderTaskList(){
  if(!list.length){box.innerHTML='<div class="muted">아직 할 일이 없습니다. 학습 자판기나 자동화에서 추가하거나 직접 추가하세요.</div>';return}
  box.innerHTML=list.map(t=>{
   const st=taskState(t),linked=taskLinkedBlocks(viewDate,t.id),partial=st.total>1?`${st.done}/${st.total} 완료`:linked.length>1?`시간표 ${linked.filter(b=>b.done).length}/${linked.length} 사용`:'';
-  return `<div class="task ${t.done?'done':''}" data-task="${t.id}">
+  return `<div class="task ${t.done?'done':''}" data-task="${esc(t.id)}">
    <div class="task-row">
-    <input class="task-check" data-id="${t.id}" type="checkbox" ${t.done?'checked':''}>
+    <input class="task-check" data-id="${esc(t.id)}" type="checkbox" ${t.done?'checked':''}>
     <div>
-      <div><span class="priority-pill ${t.priority}">${PRIORITY_LABEL[t.priority]||'권장'}</span><span class="subject-pill ${subjectClass(t.subject)}">${esc(t.subject)}</span><span class="task-title">${esc(t.name)}</span></div>
+      <div><span class="priority-pill ${Object.hasOwn(PRIORITY_LABEL,t.priority)?t.priority:'should'}">${Object.hasOwn(PRIORITY_LABEL,t.priority)?PRIORITY_LABEL[t.priority]:'권장'}</span><span class="subject-pill ${subjectClass(t.subject)}">${esc(t.subject)}</span><span class="task-title">${esc(t.name)}</span></div>
       <div class="task-meta">${esc(t.material||'')}${t.minutes?` · ${t.minutes}분`:''}${linked.length?` · 시간표 ${linked.length}곳`:''}${t.splitMode==='contiguous'?' · 연속 필요':''}</div>
       ${partial?`<div class="task-meta"><b>${partial}</b></div>`:''}
-      ${st.total>1?`<details class="component-toggle" data-tid="${t.id}" ${taskDetailOpen.has(t.id)?'open':''}><summary>세부 완료</summary><div class="component-list">${t.components.map(c=>`<label class="component-item"><input class="component-check" data-tid="${t.id}" data-cid="${c.id}" type="checkbox" ${c.done?'checked':''}>${esc(c.label)}</label>`).join('')}</div></details>`:''}
+      ${st.total>1?`<details class="component-toggle" data-tid="${esc(t.id)}" ${taskDetailOpen.has(t.id)?'open':''}><summary>세부 완료</summary><div class="component-list">${t.components.map(c=>`<label class="component-item"><input class="component-check" data-tid="${esc(t.id)}" data-cid="${esc(c.id)}" type="checkbox" ${c.done?'checked':''}>${esc(c.label)}</label>`).join('')}</div></details>`:''}
     </div>
-    <div class="task-actions"><button class="btn ghost small task-edit" data-id="${t.id}">수정</button><button class="btn ghost small task-wait" data-id="${t.id}">대기</button><button class="btn danger small task-del" data-id="${t.id}">삭제</button></div>
+    <div class="task-actions"><button class="btn ghost small task-edit" data-id="${esc(t.id)}">수정</button><button class="btn ghost small task-wait" data-id="${esc(t.id)}" ${t.deferred?'disabled':''}>${t.deferred?(t.deferred.kind==='waiting'?'대기 중':t.deferred.kind==='carry'?'이월됨':'보류'):'대기'}</button><button class="btn danger small task-del" data-id="${esc(t.id)}">삭제</button></div>
    </div>
   </div>`
  }).join('');
@@ -748,7 +831,7 @@ function renderCompactSchedule(){
   return `<div class="schedule-row ${b.done?'done':''} ${b.selfStudy&&!names.length?'empty-self':''}">
    <div class="time">${regularTimeLabel(b)}</div>
    <div><div class="name">${b.locked?'잠금 · ':''}${deviceMark(b)}${esc(b.name)}</div><div class="assigned">${names.length?names.map(esc).join(' + '):(b.selfStudy?'할 일 미배정':b.type==='meal'?'식사·휴식':'')}</div></div>
-   <div class="row">${b.selfStudy?`<button class="btn ghost small quick-assign" data-id="${b.id}">할 일 선택</button>`:''}<label class="inline"><input class="block-done" data-id="${b.id}" type="checkbox" ${b.done?'checked':''}>완료</label></div>
+   <div class="row">${b.selfStudy?`<button class="btn ghost small quick-assign" data-id="${esc(b.id)}">할 일 선택</button>`:''}<label class="inline"><input class="block-done" data-id="${esc(b.id)}" type="checkbox" ${b.done?'checked':''}>완료</label></div>
   </div>`
  }).join('');
  $$('.quick-assign').forEach(b=>b.onclick=()=>openAssignModal(viewDate,b.dataset.id));
@@ -784,7 +867,7 @@ function renderMonth(){
   if(hasTest)testCount++;
   const label=status.state==='future'?(status.total?`계획 ${status.total}`:'-'):status.state==='unclosed'?(status.total?`${status.rate}%`:'기록 없음'):(status.total?`${status.rate}%`:'-');
   const sub=(status.state==='closed'||status.state==='unclosed')&&(status.carried||status.waiting)?`이월 ${status.carried+status.waiting}`:status.state==='unclosed'&&status.total?'미마감':mins?minuteLabel(mins):status.state==='future'?'예정':'0분';
-  cells+=`<button class="month-day ${date===todayDate()?'today':''} ${date===viewDate?'selected':''} ${status.state==='future'?'future':''}" data-date="${date}"><div class="n">${n}${hasTest?'<span class="test-dot"></span>':''}</div><div class="month-mini">${label}<br>${sub}</div></button>`
+  cells+=`<button class="month-day ${date===todayDate()?'today':''} ${date===viewDate?'selected':''} ${status.state==='future'?'future':''}" data-date="${esc(date)}"><div class="n">${n}${hasTest?'<span class="test-dot"></span>':''}</div><div class="month-mini">${label}<br>${sub}</div></button>`
  }
  $('#monthCalendar').innerHTML=cells;
  $$('#monthCalendar .month-day[data-date]').forEach(b=>b.onclick=()=>{viewDate=b.dataset.date;$('#plannerDate').value=viewDate;renderMonth();navigate('dashboard')});
@@ -801,7 +884,7 @@ function renderWeek(){
  const dates=Array.from({length:5},(_,i)=>addDays(weekViewStart,i)),dayData=dates.map(d=>({date:d,blocks:ensureSchedule(d)})),keys=new Set();dayData.forEach(x=>x.blocks.forEach(b=>keys.add(weekSlotKey(b))));const rows=[...keys].sort((a,b)=>weekSlotRank(a)-weekSlotRank(b));
  $('#weekRange').textContent=`${dates[0].slice(5).replace('-','.')} ~ ${dates[4].slice(5).replace('-','.')}`;
  let html='<table class="week-table"><thead><tr><th>구간</th>'+dates.map((d,i)=>`<th>${['월','화','수','목','금'][i]}<small>${Number(d.slice(-2))}일 · ${esc(scheduleModeLabel(d))}</small></th>`).join('')+'</tr></thead><tbody>';
- rows.forEach(k=>{html+=`<tr><th>${esc(weekSlotFallback(k))}</th>`;dayData.forEach(({date,blocks})=>{const b=blocks.find(x=>weekSlotKey(x)===k);if(!b){html+='<td class="week-empty"></td>';return}const time=b.start&&b.end?`${b.start}~${b.end}`:(b.regular&&b.period?'시간 미설정':'');html+=`<td><button class="week-cell ${weekBlockClass(date,b)}" data-date="${date}"><b>${deviceMark(b)}${esc(b.name)}</b>${time?`<span>${time}</span>`:''}</button></td>`});html+='</tr>'});html+='</tbody></table>';$('#weekSchedule').innerHTML=html;
+ rows.forEach(k=>{html+=`<tr><th>${esc(weekSlotFallback(k))}</th>`;dayData.forEach(({date,blocks})=>{const b=blocks.find(x=>weekSlotKey(x)===k);if(!b){html+='<td class="week-empty"></td>';return}const time=b.start&&b.end?`${b.start}~${b.end}`:(b.regular&&b.period?'시간 미설정':'');html+=`<td><button class="week-cell ${weekBlockClass(date,b)}" data-date="${esc(date)}"><b>${deviceMark(b)}${esc(b.name)}</b>${time?`<span>${time}</span>`:''}</button></td>`});html+='</tr>'});html+='</tbody></table>';$('#weekSchedule').innerHTML=html;
  $$('.week-cell').forEach(b=>b.onclick=()=>{viewDate=b.dataset.date;$('#plannerDate').value=viewDate;navigate('planner')})
 }
 
@@ -814,7 +897,7 @@ function applyScheduleModeFromControls(){const raw=$('#scheduleModeSelect').valu
 function openScheduleTemplates(){renderScheduleTemplates();showModal('scheduleTemplateModal')}
 function renderScheduleTemplates(){
  const box=$('#scheduleTemplateList'),list=DB.scheduleTemplates||[];$('#templateTargetDate').textContent=fmtDate(viewDate);
- box.innerHTML=list.length?list.map(t=>{const timed=(t.blocks||[]).filter(b=>b.start&&b.end),range=timed.length?`${timed[0].start}~${timed[timed.length-1].end}`:'시간 없음';return`<div class="schedule-template-item" data-id="${t.id}"><div><b>${esc(t.name)}</b><span>${(t.blocks||[]).length}블록 · ${range}</span></div><div class="row wrap"><button class="btn primary small tpl-apply" data-id="${t.id}">적용</button><button class="btn ghost small tpl-rename" data-id="${t.id}">이름 변경</button><button class="btn ghost small tpl-update" data-id="${t.id}">현재로 덮어쓰기</button><button class="btn ghost small tpl-copy" data-id="${t.id}">복제</button><button class="btn danger small tpl-delete" data-id="${t.id}">삭제</button></div></div>`}).join(''):'<div class="muted">아직 저장한 시간표가 없습니다. 현재 날짜의 시간표를 먼저 저장해 보세요.</div>';
+ box.innerHTML=list.length?list.map(t=>{const timed=(t.blocks||[]).filter(b=>b.start&&b.end),range=timed.length?`${timed[0].start}~${timed[timed.length-1].end}`:'시간 없음';return`<div class="schedule-template-item" data-id="${esc(t.id)}"><div><b>${esc(t.name)}</b><span>${(t.blocks||[]).length}블록 · ${range}</span></div><div class="row wrap"><button class="btn primary small tpl-apply" data-id="${esc(t.id)}">적용</button><button class="btn ghost small tpl-rename" data-id="${esc(t.id)}">이름 변경</button><button class="btn ghost small tpl-update" data-id="${esc(t.id)}">현재로 덮어쓰기</button><button class="btn ghost small tpl-copy" data-id="${esc(t.id)}">복제</button><button class="btn danger small tpl-delete" data-id="${esc(t.id)}">삭제</button></div></div>`}).join(''):'<div class="muted">아직 저장한 시간표가 없습니다. 현재 날짜의 시간표를 먼저 저장해 보세요.</div>';
  $$('.tpl-apply').forEach(b=>b.onclick=()=>{if(setDayScheduleMode(viewDate,'template',b.dataset.id)){hideModal('scheduleTemplateModal');renderPlanner();renderDashboard();if($('#week')?.classList.contains('active'))renderWeek()}});
  $$('.tpl-rename').forEach(b=>b.onclick=()=>{const t=scheduleTemplateById(b.dataset.id),name=prompt('새 이름',t?.name||'');if(!name?.trim())return;updateScheduleTemplate(b.dataset.id,{name:name.trim()});renderScheduleTemplates();renderScheduleModeControls()});
  $$('.tpl-update').forEach(b=>b.onclick=()=>{const t=scheduleTemplateById(b.dataset.id);if(!t||!confirm(`현재 ${fmtDate(viewDate)} 시간표로 “${t.name}”을 덮어쓸까요?`))return;updateScheduleTemplate(b.dataset.id,{blocks:scheduleTemplateBlocksFromDate(viewDate)});renderScheduleTemplates();renderScheduleModeControls()});
@@ -866,7 +949,7 @@ function renderTenGrid(){
    if(isSleep&&isWake)label=`<span class="cell-label">☽☼︎</span>`;
    else if(isSleep)label=`<span class="cell-label">☽</span>`;
    else if(isWake)label=`<span class="cell-label">☼︎</span>`;
-   html+=`<div class="ten-cell ${cls}" data-index="${idx}" ${b?`data-block="${b.id}"`:''}>${label}</div>`
+   html+=`<div class="ten-cell ${cls}" data-index="${esc(idx)}" ${b?`data-block="${esc(b.id)}"`:''}>${label}</div>`
   }html+='</div>'
  }
  box.innerHTML=html;box.classList.toggle('planner-mode-edit',plannerEdit);
@@ -927,7 +1010,7 @@ function openAssignModal(date,blockId){
 }
 function renderAssignList(){
  const date=$('#assignDate').value,id=$('#assignBlockId').value,b=ensureSchedule(date).find(x=>x.id===id),q=$('#assignSearch').value.trim().toLowerCase(),list=tasksFor(date).filter(t=>!q||`${t.subject} ${t.name} ${t.material}`.toLowerCase().includes(q));
- $('#assignTaskList').innerHTML=list.length?list.map(t=>{const links=taskLinkedBlocks(date,t.id).filter(x=>x.id!==id).length;return `<label class="assign-option"><input class="assign-check" type="checkbox" value="${t.id}" ${(b.taskIds||[]).includes(t.id)?'checked':''}><div><b>${esc(t.subject)} · ${esc(t.name)}</b><div class="task-meta">${esc(t.material||'')}${links?` · 다른 블록 ${links}곳에도 배정`:''}</div></div></label>`}).join(''):'<div class="muted">이 날짜의 할 일이 없습니다.</div>';updateAssignCount();$$('.assign-check').forEach(x=>x.onchange=updateAssignCount)
+ $('#assignTaskList').innerHTML=list.length?list.map(t=>{const links=taskLinkedBlocks(date,t.id).filter(x=>x.id!==id).length;return `<label class="assign-option"><input class="assign-check" type="checkbox" value="${esc(t.id)}" ${(b.taskIds||[]).includes(t.id)?'checked':''}><div><b>${esc(t.subject)} · ${esc(t.name)}</b><div class="task-meta">${esc(t.material||'')}${links?` · 다른 블록 ${links}곳에도 배정`:''}</div></div></label>`}).join(''):'<div class="muted">이 날짜의 할 일이 없습니다.</div>';updateAssignCount();$$('.assign-check').forEach(x=>x.onchange=updateAssignCount)
 }
 function updateAssignCount(){$('#assignCount').textContent=`${$$('.assign-check:checked').length}개 선택`}
 function saveAssignments(){
@@ -938,10 +1021,10 @@ function renderVendingIfVisible(){if($('#vending')?.classList.contains('active')
 function renderVending(){
  $$('.learning-tab').forEach(b=>b.classList.toggle('active',b.dataset.vtab===vendingTab));
  $('#lecturePanel').classList.toggle('hidden',vendingTab==='book');$('#bookPanel').classList.toggle('hidden',vendingTab==='lecture');
- renderRecentLearning();renderLectureCatalog();renderBookCatalog();renderCart()
+ renderRecentLearning();renderLectureCatalog();renderBookCatalog();renderCart();if(typeof polishView==='function')polishView();
 }
 function renderRecentLearning(){
- const box=$('#recentLearning'),a=DB.recentLearning||[];box.innerHTML=a.length?'<span class="muted">최근 사용</span>'+a.map(x=>`<button class="recent-chip" data-kind="${x.kind}" data-id="${x.id}">${esc(x.label)}</button>`).join(''):'';
+ const box=$('#recentLearning'),a=DB.recentLearning||[];box.innerHTML=a.length?'<span class="muted">최근 사용</span>'+a.map(x=>`<button class="recent-chip" data-kind="${esc(x.kind)}" data-id="${esc(x.id)}">${esc(x.label)}</button>`).join(''):'';
  $$('#recentLearning .recent-chip').forEach(b=>b.onclick=()=>{const q=b.textContent;$('#learningSearch').value=q;applyVendingSearch()})
 }
 function renderLectureCatalog(){
@@ -951,10 +1034,10 @@ function renderLectureCatalog(){
   for(let n=1;n<=c.total;n++){
    const ref=lectureRef(c.key,n),isDone=lectureDone(ref),inCart=cart.some(x=>x.kind==='lecture'&&x.ref===ref);
    if(inc&&isDone)continue;
-   buttons.push(`<button class="lecture-btn ${isDone?'done':''} ${inCart?'cart':''}" data-ref="${ref}"><b>${String(n).padStart(2,'0')}강</b><small>${isDone?'완료':inCart?'장바구니':'미수강'}</small></button>`)
+   buttons.push(`<button class="lecture-btn ${isDone?'done':''} ${inCart?'cart':''}" data-ref="${esc(ref)}"><b>${String(n).padStart(2,'0')}강</b><small>${isDone?'완료':inCart?'장바구니':'미수강'}</small></button>`)
   }
   return `<section class="source-card vending-source" data-search="${esc(`${c.subject} ${c.provider} ${c.display}`.toLowerCase())}">
-    <div class="source-head"><div><h4>${esc(c.subject)} · ${esc(c.provider)} ${esc(c.display)}</h4><span>${done}/${c.total}강 완료</span></div><div class="row"><button class="btn ghost small add-next" data-key="${c.key}" data-count="2">다음 2강</button>${c.custom?`<button class="btn danger small del-course" data-key="${c.key}">삭제</button>`:''}</div></div>
+    <div class="source-head"><div><h4>${esc(c.subject)} · ${esc(c.provider)} ${esc(c.display)}</h4><span>${done}/${c.total}강 완료</span></div><div class="row"><button class="btn ghost small add-next" data-key="${esc(c.key)}" data-count="2">다음 2강</button>${c.custom?`<button class="btn danger small del-course" data-key="${esc(c.key)}">삭제</button>`:''}</div></div>
     <div class="lecture-grid">${buttons.join('')||'<div class="muted">표시할 강의가 없습니다.</div>'}</div>
   </section>`
  }).join('');
@@ -978,8 +1061,8 @@ function renderBookCatalog(){
  $('#bookCatalog').innerHTML=DB.books.length?DB.books.map(b=>{
   const done=(b.subunits||[]).filter(s=>bookSubDone(b.id,s)).length;
   return `<section class="source-card vending-source" data-search="${esc(`${b.subject} ${b.name} ${(b.subunits||[]).join(' ')}`.toLowerCase())}">
-   <div class="source-head"><div><h4>${esc(b.subject)} · ${esc(b.name)}</h4><span>소단원 ${done}/${(b.subunits||[]).length}</span></div><div class="row"><button class="btn ghost small problems-add" data-id="${b.id}">문제 수로 담기</button><button class="btn ghost small edit-book" data-id="${b.id}">편집</button><button class="btn danger small del-book" data-id="${b.id}">삭제</button></div></div>
-   <div class="subunit-grid">${(b.subunits||[]).map((s,i)=>{const inCart=cart.some(x=>x.kind==='book-subunit'&&x.bookId===b.id&&x.subunit===s);return `<button class="subunit-btn ${bookSubDone(b.id,s)?'done':''} ${inCart?'cart':''}" data-book="${b.id}" data-sub="${esc(s)}" data-index="${i}"><b>${esc(s)}</b><small>${bookSubDone(b.id,s)?'완료':inCart?'장바구니':'소단원으로 담기'}</small></button>`}).join('')||'<div class="muted">소단원이 없습니다. 편집에서 추가하세요.</div>'}</div>
+   <div class="source-head"><div><h4>${esc(b.subject)} · ${esc(b.name)}</h4><span>소단원 ${done}/${(b.subunits||[]).length}</span></div><div class="row"><button class="btn ghost small problems-add" data-id="${esc(b.id)}">문제 수로 담기</button><button class="btn ghost small edit-book" data-id="${esc(b.id)}">편집</button><button class="btn danger small del-book" data-id="${esc(b.id)}">삭제</button></div></div>
+   <div class="subunit-grid">${(b.subunits||[]).map((s,i)=>{const inCart=cart.some(x=>x.kind==='book-subunit'&&x.bookId===b.id&&x.subunit===s);return `<button class="subunit-btn ${bookSubDone(b.id,s)?'done':''} ${inCart?'cart':''}" data-book="${esc(b.id)}" data-sub="${esc(s)}" data-index="${esc(i)}"><b>${esc(s)}</b><small>${bookSubDone(b.id,s)?'완료':inCart?'장바구니':'소단원으로 담기'}</small></button>`}).join('')||'<div class="muted">소단원이 없습니다. 편집에서 추가하세요.</div>'}</div>
   </section>`
  }).join(''):'<div class="muted">등록된 문제집이 없습니다.</div>';
  $$('.subunit-btn').forEach(b=>b.onclick=()=>toggleBookSubunit(b.dataset.book,b.dataset.sub,Number(b.dataset.index)));
@@ -1020,9 +1103,9 @@ function applyVendingSearch(){
 function renderCart(){
  const box=$('#cartList');$('#cartCount').textContent=`${cart.length}개`;$('#cartDate').value=$('#cartDate').value||viewDate;
  box.innerHTML=cart.length?cart.map(x=>{
-  if(x.kind==='lecture'){const i=lectureInfo(x.ref);return `<div class="cart-item"><div><b>인강 · ${esc(i?.display)} ${i?.n}강</b><span>${esc(i?.subject)} · ${esc(i?.provider)}</span></div><button class="btn danger small cart-del" data-id="${x.id}">×</button></div>`}
+  if(x.kind==='lecture'){const i=lectureInfo(x.ref);return `<div class="cart-item"><div><b>인강 · ${esc(i?.display)} ${i?.n}강</b><span>${esc(i?.subject)} · ${esc(i?.provider)}</span></div><button class="btn danger small cart-del" data-id="${esc(x.id)}">×</button></div>`}
   const b=DB.books.find(y=>y.id===x.bookId);const label=x.kind==='book-subunit'?`${b?.name} · ${x.subunit}`:`${b?.name}${x.subunit?' · '+x.subunit:''} ${x.start}~${x.end}번`;
-  return `<div class="cart-item"><div><b>문제집 · ${esc(label)}</b><span>${esc(b?.subject)} · ${x.minutes}분</span></div><button class="btn danger small cart-del" data-id="${x.id}">×</button></div>`
+  return `<div class="cart-item"><div><b>문제집 · ${esc(label)}</b><span>${esc(b?.subject)} · ${x.minutes}분</span></div><button class="btn danger small cart-del" data-id="${esc(x.id)}">×</button></div>`
  }).join(''):'<div class="muted">강의나 문제집 항목을 클릭해서 담으세요.</div>';
  $$('.cart-del').forEach(b=>b.onclick=()=>{cart=cart.filter(x=>x.id!==b.dataset.id);renderVending()});
  const date=$('#cartDate').value||viewDate,blocks=ensureSchedule(date),open=blocks.filter(b=>b.selfStudy&&!b.locked&&!(b.taskIds||[]).length);
@@ -1074,7 +1157,7 @@ function learningProgressItems(){
 }
 function renderProgress__impl1(){
  const rows=learningProgressItems(),subs=[...new Set(rows.map(x=>x.subject))],box=$('#progressCatalog');
- box.innerHTML=rows.length?subs.map(s=>`<section class="progress-group"><h4>${esc(s)}</h4><div class="progress-grid">${rows.filter(x=>x.subject===s).map(x=>{const pct=x.total?Math.round(x.done/x.total*100):0;return `<button class="progress-card" data-kind="${x.sourceKind}" data-id="${x.id}"><span class="kind-pill">${x.kind}</span><h5>${esc(x.name)}</h5><div class="task-meta">${esc(x.note)}</div><div class="progress-line"><i style="width:${pct}%"></i></div><b>${x.total?`${x.done}/${x.total} · ${pct}%`:'소단원 미등록'}</b></button>`}).join('')}</div></section>`).join(''):'<div class="muted">학습 자판기에 등록된 항목이 없습니다.</div>';
+ box.innerHTML=rows.length?subs.map(s=>`<section class="progress-group"><h4>${esc(s)}</h4><div class="progress-grid">${rows.filter(x=>x.subject===s).map(x=>{const pct=x.total?Math.round(x.done/x.total*100):0;return `<button class="progress-card" data-kind="${esc(x.sourceKind)}" data-id="${esc(x.id)}"><span class="kind-pill">${x.kind}</span><h5>${esc(x.name)}</h5><div class="task-meta">${esc(x.note)}</div><div class="progress-line"><i style="width:${pct}%"></i></div><b>${x.total?`${x.done}/${x.total} · ${pct}%`:'소단원 미등록'}</b></button>`}).join('')}</div></section>`).join(''):'<div class="muted">학습 자판기에 등록된 항목이 없습니다.</div>';
  $$('.progress-card').forEach(b=>b.onclick=()=>{navigate('vending');vendingTab=b.dataset.kind==='lecture'?'lecture':'book';$('#learningSearch').value=b.dataset.kind==='lecture'?(lectureCourse(b.dataset.id)?.display||''):(DB.books.find(x=>x.id===b.dataset.id)?.name||'');renderVending()})
 }
 
@@ -1087,7 +1170,7 @@ function automationRuleApplies(r,date){
  if(DB.automationSkips[`${r.id}:${date}`])return false;return true
 }
 function pendingSourcePool(){
- const arr=[];Object.values(DB.tasks||{}).flat().filter(t=>!t.done).forEach(t=>arr.push(t));(DB.waiting||[]).filter(t=>!t.done).forEach(t=>arr.push(t));(DB.automationConflicts||[]).forEach(c=>{if(c.proposal&&!c.proposal.done)arr.push(c.proposal)});return arr
+ const arr=[];Object.values(DB.tasks||{}).flat().filter(t=>!t.done&&!t.deferred).forEach(t=>arr.push(t));(DB.waiting||[]).filter(t=>!t.done&&!t.deferred).forEach(t=>arr.push(t));(DB.automationConflicts||[]).forEach(c=>{if(c.proposal&&!c.proposal.done)arr.push(c.proposal)});return arr
 }
 function taskUsesLecture(ref){return pendingSourcePool().some(t=>(t.components||[]).some(c=>c.kind==='lecture'&&c.ref===ref&&!c.done))}
 function taskUsesSubunit(bookId,sub){return pendingSourcePool().some(t=>(t.components||[]).some(c=>c.kind==='book'&&c.bookItem?.mode==='subunit'&&c.bookItem.bookId===bookId&&c.bookItem.subunit===sub&&!c.done))}
@@ -1116,7 +1199,7 @@ function runAutomationForDate(date){
 }
 function renderAutomation(){
  const opts=automationOptions(),today=todayDate();
- $('#automationList').innerHTML=DB.automations.length?DB.automations.map(r=>{const s=opts.find(x=>x.value===r.source),due=automationRuleApplies(r,today);return `<div class="automation-rule ${r.enabled===false?'paused':''}"><div class="rule-top"><div><b>${esc(s?.label||'삭제된 항목')}</b><div class="task-meta">${(r.weekdays||[]).map(x=>DAYNAME[x][0]).join('·')} · ${r.start||''}~${r.end||'계속'} · ${r.minutes?`${r.minutes}분`:'시간 미입력'}</div></div><div class="row"><button class="btn ghost small auto-edit" data-id="${r.id}">수정</button><button class="btn ghost small auto-skip" data-id="${r.id}" ${due?'':'disabled'}>오늘만 건너뛰기</button><button class="btn warn small auto-toggle" data-id="${r.id}">${r.enabled===false?'재개':'일시정지'}</button><button class="btn danger small auto-del" data-id="${r.id}">삭제</button></div></div></div>`}).join(''):'<div class="muted">반복 규칙이 없습니다.</div>';
+ $('#automationList').innerHTML=DB.automations.length?DB.automations.map(r=>{const s=opts.find(x=>x.value===r.source),due=automationRuleApplies(r,today);return `<div class="automation-rule ${r.enabled===false?'paused':''}"><div class="rule-top"><div><b>${esc(s?.label||'삭제된 항목')}</b><div class="task-meta">${(r.weekdays||[]).map(x=>DAYNAME[x][0]).join('·')} · ${r.start||''}~${r.end||'계속'} · ${r.minutes?`${r.minutes}분`:'시간 미입력'}</div></div><div class="row"><button class="btn ghost small auto-edit" data-id="${esc(r.id)}">수정</button><button class="btn ghost small auto-skip" data-id="${esc(r.id)}" ${due?'':'disabled'}>오늘만 건너뛰기</button><button class="btn warn small auto-toggle" data-id="${esc(r.id)}">${r.enabled===false?'재개':'일시정지'}</button><button class="btn danger small auto-del" data-id="${esc(r.id)}">삭제</button></div></div></div>`}).join(''):'<div class="muted">반복 규칙이 없습니다.</div>';
  $$('.auto-edit').forEach(b=>b.onclick=()=>openAutomationModal(DB.automations.find(x=>x.id===b.dataset.id)));
  $$('.auto-skip').forEach(b=>b.onclick=()=>skipAutomationToday(b.dataset.id));
  $$('.auto-toggle').forEach(b=>b.onclick=()=>{const r=DB.automations.find(x=>x.id===b.dataset.id);if(r)r.enabled=r.enabled===false;clearAutomationRuns(r.id,todayDate());saveDB();runAutomationForDate(todayDate());renderAutomation();if(viewDate===todayDate())renderDashboard()});
@@ -1124,7 +1207,7 @@ function renderAutomation(){
 }
 function openAutomationModal(r=null){
  const opts=automationOptions();if(!opts.length){alert('학습 자판기에 강좌나 문제집을 먼저 등록하세요.');return}
- $('#automationSource').innerHTML=opts.map(x=>`<option value="${x.value}">${esc(x.label)}</option>`).join('');$('#automationId').value=r?.id||'';$('#automationSource').value=r?.source||opts[0].value;$$('#weekdayPicker input').forEach(x=>x.checked=(r?.weekdays||[1,2,3,4,5,6]).includes(Number(x.value)));$('#automationStart').value=r?.start||todayDate();$('#automationEnd').value=r?.end||CSAT;$('#automationPriority').value=r?.priority||'must';$('#automationMinutes').value=r?.minutes||'';$('#automationEnabled').checked=r?.enabled!==false;showModal('automationModal')
+ $('#automationSource').innerHTML=opts.map(x=>`<option value="${esc(x.value)}">${esc(x.label)}</option>`).join('');$('#automationId').value=r?.id||'';$('#automationSource').value=r?.source||opts[0].value;$$('#weekdayPicker input').forEach(x=>x.checked=(r?.weekdays||[1,2,3,4,5,6]).includes(Number(x.value)));$('#automationStart').value=r?.start||todayDate();$('#automationEnd').value=r?.end||CSAT;$('#automationPriority').value=r?.priority||'must';$('#automationMinutes').value=r?.minutes||'';$('#automationEnabled').checked=r?.enabled!==false;showModal('automationModal')
 }
 function ruleMeaningChanged(a,b){return !a||a.source!==b.source||JSON.stringify(a.weekdays||[])!==JSON.stringify(b.weekdays||[])||a.start!==b.start||a.end!==b.end}
 function generatedTasksForRule(ruleId,from=todayDate()){const out=[];Object.entries(DB.tasks).forEach(([date,arr])=>{if(date>=from)(arr||[]).filter(t=>t.automationRuleId===ruleId&&!t.done).forEach(t=>out.push({date,task:t}))});return out}
@@ -1139,7 +1222,7 @@ function skipAutomationToday(id){
  DB.automationSkips[`${id}:${today}`]=true;(DB.tasks[today]||[]).filter(x=>x.automationRuleId===id&&!x.done).forEach(x=>removeTask(today,x.id,false));DB.automationConflicts=DB.automationConflicts.filter(x=>!(x.ruleId===id&&x.date===today));setAutomationRun(id,today,'skipped');saveDB();renderAutomation();if(viewDate===today)renderDashboard()
 }
 function renderConflicts(){
- const today=todayDate(),list=DB.automationConflicts.filter(c=>!c.date||c.date<=today);$('#conflictCount').textContent=`${list.length}건`;$('#conflictList').innerHTML=list.length?list.map(c=>{const r=DB.automations.find(x=>x.id===c.ruleId),o=automationOptions().find(x=>x.value===(r?.source||c.sourceSnapshot));return `<div class="conflict-card"><b>${esc(o?.label||'반복 할 일')}</b><div class="task-meta">${c.previousDate} 미완료 → ${c.date} 반복일</div><div class="row"><button class="btn primary small conflict-act" data-id="${c.id}" data-act="merge">오늘 것과 합치기</button><button class="btn ghost small conflict-act" data-id="${c.id}" data-act="separate">별도 유지</button><button class="btn warn small conflict-act" data-id="${c.id}" data-act="skip">이전 것은 건너뛰기</button></div></div>`}).join(''):'<div class="muted">미완료 충돌이 없습니다.</div>';$$('.conflict-act').forEach(b=>b.onclick=()=>resolveConflict(b.dataset.id,b.dataset.act))
+ const today=todayDate(),list=DB.automationConflicts.filter(c=>!c.date||c.date<=today);$('#conflictCount').textContent=`${list.length}건`;$('#conflictList').innerHTML=list.length?list.map(c=>{const r=DB.automations.find(x=>x.id===c.ruleId),o=automationOptions().find(x=>x.value===(r?.source||c.sourceSnapshot));return `<div class="conflict-card"><b>${esc(o?.label||'반복 할 일')}</b><div class="task-meta">${c.previousDate} 미완료 → ${c.date} 반복일</div><div class="row"><button class="btn primary small conflict-act" data-id="${esc(c.id)}" data-act="merge">오늘 것과 합치기</button><button class="btn ghost small conflict-act" data-id="${esc(c.id)}" data-act="separate">별도 유지</button><button class="btn warn small conflict-act" data-id="${esc(c.id)}" data-act="skip">이전 것은 건너뛰기</button></div></div>`}).join(''):'<div class="muted">미완료 충돌이 없습니다.</div>';$$('.conflict-act').forEach(b=>b.onclick=()=>resolveConflict(b.dataset.id,b.dataset.act))
 }
 function componentIdentity(c){if(c.kind==='lecture')return `lecture:${c.ref}`;if(c.kind==='book'&&c.bookItem)return `book:${c.bookItem.mode}:${c.bookItem.bookId}:${c.bookItem.subunit||''}:${c.bookItem.start||''}:${c.bookItem.end||''}`;return `${c.kind||'manual'}:${c.label||''}`}
 function mergedAutomationTask(prev,proposal){
@@ -1157,9 +1240,9 @@ function resolveConflict(id,act){
 }
 
 function renderWaiting(){
- const box=$('#waitingList');box.innerHTML=DB.waiting.length?DB.waiting.map(t=>`<div class="waiting-item"><div class="waiting-top"><div><b>${esc(t.subject)} · ${esc(t.name)}</b><div class="task-meta">${esc(t.material||'')} · 대기 ${t.waitingSince||''}</div></div><div class="row"><button class="btn primary small wait-today" data-id="${t.id}">오늘로</button><button class="btn danger small wait-del" data-id="${t.id}">삭제</button></div></div></div>`).join(''):'<div class="muted">대기 중인 할 일이 없습니다.</div>';
- $$('.wait-today').forEach(b=>b.onclick=()=>{const i=DB.waiting.findIndex(x=>x.id===b.dataset.id);if(i<0)return;const t=DB.waiting.splice(i,1)[0];carryTaskToDate(t,viewDate);saveDB();renderWaiting();renderDashboard()});
- $$('.wait-del').forEach(b=>b.onclick=()=>{const t=DB.waiting.find(x=>x.id===b.dataset.id);if(!t)return;trashPush('waiting',t);DB.waiting=DB.waiting.filter(x=>x.id!==t.id);saveDB();renderWaiting()})
+ const box=$('#waitingList');box.innerHTML=DB.waiting.length?DB.waiting.map(t=>`<div class="waiting-item"><div class="waiting-top"><div><b>${esc(t.subject)} · ${esc(t.name)}</b><div class="task-meta">${esc(t.material||'')} · 대기 ${t.waitingSince||''}</div></div><div class="row"><button class="btn primary small wait-today" data-id="${esc(t.id)}">오늘로</button><button class="btn danger small wait-del" data-id="${esc(t.id)}">삭제</button></div></div></div>`).join(''):'<div class="muted">대기 중인 할 일이 없습니다.</div>';
+ $$('.wait-today').forEach(b=>b.onclick=()=>{if(commitChange(()=>{const i=DB.waiting.findIndex(x=>x.id===b.dataset.id);if(i<0)return;const t=DB.waiting.splice(i,1)[0];carryTaskToDate(t,viewDate);})){renderWaiting();renderDashboard();}});
+ $$('.wait-del').forEach(b=>b.onclick=()=>{if(commitChange(()=>{const t=DB.waiting.find(x=>x.id===b.dataset.id);if(!t)return;trashPush('waiting',t);DB.waiting=DB.waiting.filter(x=>x.id!==t.id);const original=t.origin&&taskById(t.origin.date,t.origin.id);if(original?.deferred?.queueId===t.id)original.deferred.kind='skip';})){renderWaiting();renderDashboard();}});
 }
 
 function testListFilters(){return{source:$('#testSourceFilter')?.value||'all',scope:$('#testScopeFilter')?.value||'all',subject:$('#testSubjectFilter')?.value||'all'}}
@@ -1176,7 +1259,7 @@ function renderTests__impl1(){
  renderTestSubjectBoard();renderTestAllSubjectSummary();renderScoreAnalysis();
  $('#testList').innerHTML=list.length?list.map(t=>{
   const rows=testSubjectRows(t),meta=rows.map(r=>`${r.subject} ${r.score?`${r.score}점 `:''}${r.grade?`${r.grade}등급`:''}${r.wrong?` · 오답 ${r.wrong}`:''}${r.minutes?` · ${r.minutes}분`:''}`).join(' · '),questions=(t.questionRecords||[]).length,pending=(t.questionRecords||[]).filter(q=>q.retryState!=='resolved').length;
-  return `<div class="test-card"><div class="test-top"><div><div><span class="kind-pill">${esc(testSourceLabel(t.source))}</span><span class="scope-pill">${esc(testScopeLabel(t.scope))}</span></div><b>${t.date} · ${esc(t.name||'시험')}${t.round?` · ${esc(t.round)}`:''}</b><div class="task-meta">${meta||'성적 미입력'}${(t.causes||[]).length?` · ${(t.causes||[]).map(esc).join(' / ')}`:''}</div>${questions?`<div class="task-meta">문항 기록 ${questions}개 · 재풀이 ${pending}개</div>`:''}</div><div class="row"><button class="btn ghost small test-review" data-id="${t.id}">문항 분석</button><button class="btn danger small test-del" data-id="${t.id}">삭제</button></div></div></div>`
+  return `<div class="test-card"><div class="test-top"><div><div><span class="kind-pill">${esc(testSourceLabel(t.source))}</span><span class="scope-pill">${esc(testScopeLabel(t.scope))}</span></div><b>${t.date} · ${esc(t.name||'시험')}${t.round?` · ${esc(t.round)}`:''}</b><div class="task-meta">${meta||'성적 미입력'}${(t.causes||[]).length?` · ${(t.causes||[]).map(esc).join(' / ')}`:''}</div>${questions?`<div class="task-meta">문항 기록 ${questions}개 · 재풀이 ${pending}개</div>`:''}</div><div class="row"><button class="btn ghost small test-review" data-id="${esc(t.id)}">문항 분석</button><button class="btn danger small test-del" data-id="${esc(t.id)}">삭제</button></div></div></div>`
  }).join(''):'<div class="muted">선택한 조건의 시험 기록이 없습니다.</div>';
  $$('.test-del').forEach(b=>b.onclick=()=>{const t=DB.tests.find(x=>x.id===b.dataset.id);if(!t)return;if(confirm('시험 기록을 휴지통으로 이동할까요?')){trashPush('test',t);DB.tests=DB.tests.filter(x=>x.id!==t.id);saveDB();renderTests()}});
  $$('.test-review').forEach(b=>b.onclick=()=>openTestReviewModal(b.dataset.id));
@@ -1186,9 +1269,9 @@ function renderTestSubjectBoard(){
  const box=$('#testSubjectBoard');if(!box)return;
  box.innerHTML=SUBJECTS.map(subject=>{
   const rows=subjectHistory(subject,{scope:'representative'}),latest=rows.at(-1),previous=rows.at(-2),pending=reviewEntries({subject}).length;
-  if(!latest)return `<button type="button" class="test-subject-card ${subjectClass(subject)} analysis-subject-jump" data-subject="${subject}"><b>${subject}</b><strong>기록 없음</strong><span>대표 시험을 입력하세요.</span><small>원점수 · 등급 · 재풀이</small></button>`;
+  if(!latest)return `<button type="button" class="test-subject-card ${subjectClass(subject)} analysis-subject-jump" data-subject="${esc(subject)}"><b>${subject}</b><strong>기록 없음</strong><span>대표 시험을 입력하세요.</span><small>원점수 · 등급 · 재풀이</small></button>`;
   const scoreDelta=latest.score&&previous?.score?latest.score-previous.score:null,scoreText=latest.score?`${latest.score}점`:latest.grade?`${latest.grade}등급`:'기록 없음',trend=scoreDelta==null?'비교 기록 부족':`${scoreDelta>0?'+':''}${scoreDelta}점`;
-  return `<button type="button" class="test-subject-card ${subjectClass(subject)} analysis-subject-jump" data-subject="${subject}"><b>${subject}</b><strong>${scoreText}</strong><span>${esc(testRecordShortLabel(latest.test))}</span><small>${latest.grade?`${latest.grade}등급 · `:''}${latest.minutes?`${latest.minutes}분 · `:''}최근 변화 ${trend}${pending?` · 재풀이 ${pending}`:''}</small></button>`
+  return `<button type="button" class="test-subject-card ${subjectClass(subject)} analysis-subject-jump" data-subject="${esc(subject)}"><b>${subject}</b><strong>${scoreText}</strong><span>${esc(testRecordShortLabel(latest.test))}</span><small>${latest.grade?`${latest.grade}등급 · `:''}${latest.minutes?`${latest.minutes}분 · `:''}최근 변화 ${trend}${pending?` · 재풀이 ${pending}`:''}</small></button>`
  }).join('');
  $$('.analysis-subject-jump').forEach(b=>b.onclick=()=>{const selector=$('#analysisSubjectFilter');if(selector){selector.value=b.dataset.subject;renderTests();$('#scoreAnalysisTitle')?.scrollIntoView({behavior:'smooth',block:'start'})}})
 }
@@ -1211,7 +1294,7 @@ function renderScoreAnalysis(){
  const f=analysisFilterState(),empty=$('#scoreAnalysisEmpty'),content=$('#scoreAnalysisContent');if(!empty||!content)return;
  if(f.subject==='all'){
   $('#scoreAnalysisTitle').textContent='전과목 조망';$('#scoreAnalysisCaption').textContent='대표 시험 기준으로 현재 위치와 다음에 볼 과목을 고릅니다.';content.classList.add('hidden');empty.classList.remove('hidden');
-  empty.innerHTML=`<div class="analysis-overview-list">${SUBJECTS.map(subject=>{const rows=subjectHistory(subject,{source:f.source,scope:f.scope}),latest=rows.at(-1),prev=rows.at(-2),delta=latest?.score&&prev?.score?latest.score-prev.score:null,pending=reviewEntries({subject}).length;return `<button type="button" class="analysis-overview-row analysis-subject-jump" data-subject="${subject}"><span class="subject-dot ${subjectClass(subject)}"></span><b>${subject}</b><strong>${latest?(latest.score?`${latest.score}점`:(latest.grade?`${latest.grade}등급`:'기록만 있음')):'기록 없음'}</strong><small>${latest?.grade?`${latest.grade}등급 · `:''}${delta==null?'추이 대기':`최근 ${delta>0?'+':''}${delta}점`} ${pending?`· 재풀이 ${pending}`:''}</small></button>`}).join('')}</div><div class="muted analysis-overview-note">과목을 누르면 원점수·등급 흐름과 반복 오답 문항을 같은 조건으로 봅니다.</div>`;
+  empty.innerHTML=`<div class="analysis-overview-list">${SUBJECTS.map(subject=>{const rows=subjectHistory(subject,{source:f.source,scope:f.scope}),latest=rows.at(-1),prev=rows.at(-2),delta=latest?.score&&prev?.score?latest.score-prev.score:null,pending=reviewEntries({subject}).length;return `<button type="button" class="analysis-overview-row analysis-subject-jump" data-subject="${esc(subject)}"><span class="subject-dot ${subjectClass(subject)}"></span><b>${subject}</b><strong>${latest?(latest.score?`${latest.score}점`:(latest.grade?`${latest.grade}등급`:'기록만 있음')):'기록 없음'}</strong><small>${latest?.grade?`${latest.grade}등급 · `:''}${delta==null?'추이 대기':`최근 ${delta>0?'+':''}${delta}점`} ${pending?`· 재풀이 ${pending}`:''}</small></button>`}).join('')}</div><div class="muted analysis-overview-note">과목을 누르면 원점수·등급 흐름과 반복 오답 문항을 같은 조건으로 봅니다.</div>`;
   $$('.analysis-subject-jump').forEach(b=>b.onclick=()=>{const selector=$('#analysisSubjectFilter');if(selector){selector.value=b.dataset.subject;renderTests()}});return
  }
  const rows=subjectHistory(f.subject,{source:f.source,scope:f.scope});$('#scoreAnalysisTitle').textContent=`${f.subject} 성적 흐름`;$('#scoreAnalysisCaption').textContent=`${f.scope==='representative'?'대표 시험 우선':f.scope==='full'?'전범위 시험만':'입력한 전체 범위'} · ${f.source==='all'?'전체 출처':testSourceLabel(f.source)}`;
@@ -1235,15 +1318,15 @@ function renderQuestionPattern(subject,filters){
  const grid=$('#questionNumberGrid'),legend=$('#questionHeatLegend'),insight=$('#questionInsight');if(!grid||!legend||!insight)return;const pattern=questionPattern(subject,filters),selected=selectedQuestionBySubject[subject];
  if(pattern.attempts<3){grid.innerHTML=`<div class="question-pattern-wait">${pattern.attempts}회 기록됨 · 같은 조건의 시험이 3회 이상 쌓이면 문항별 반복률을 표시합니다.</div>`;legend.textContent='단원 시험과 전범위 시험을 섞어 오해하지 않도록 현재 필터의 기록만 셉니다.';insight.innerHTML='<div class="muted">문항 번호를 입력한 시험부터 D+1 재풀이 대기열에 들어갑니다.</div>';return}
  const top=[...pattern.stats.values()].filter(s=>s.wrongTestIds.size).sort((a,b)=>b.wrongTestIds.size-a.wrongTestIds.size||a.number-b.number)[0],active=selected&&pattern.stats.has(selected)?selected:top?.number||null;if(active)selectedQuestionBySubject[subject]=active;
- grid.innerHTML=Array.from({length:QUESTION_LIMITS[subject]},(_,i)=>{const number=i+1,s=pattern.stats.get(number),wrong=s?.wrongTestIds.size||0,uncertain=s?.uncertainTestIds.size||0,heat=Math.min(3,wrong),isActive=number===active;return `<button type="button" class="question-cell heat-${heat}${uncertain?' has-uncertain':''}${isActive?' selected':''}" data-subject="${subject}" data-number="${number}" aria-label="${number}번, ${wrong}/${pattern.attempts}회 오답">${number}${wrong?`<small>${wrong}/${pattern.attempts}</small>`:''}</button>`}).join('');
+ grid.innerHTML=Array.from({length:QUESTION_LIMITS[subject]},(_,i)=>{const number=i+1,s=pattern.stats.get(number),wrong=s?.wrongTestIds.size||0,uncertain=s?.uncertainTestIds.size||0,heat=Math.min(3,wrong),isActive=number===active;return `<button type="button" class="question-cell heat-${heat}${uncertain?' has-uncertain':''}${isActive?' selected':''}" data-subject="${esc(subject)}" data-number="${esc(number)}" aria-label="${number}번, ${wrong}/${pattern.attempts}회 오답">${number}${wrong?`<small>${wrong}/${pattern.attempts}</small>`:''}</button>`}).join('');
  legend.textContent=`${subject} ${pattern.attempts}회 기준 · 숫자는 오답 시험 수/비교 시험 수 · 점선은 애매하지만 맞은 문항 기록`;
  $$('.question-cell').forEach(b=>b.onclick=()=>{selectedQuestionBySubject[b.dataset.subject]=Number(b.dataset.number);renderScoreAnalysis()});
  const stat=active?pattern.stats.get(active):null;if(!stat||!stat.wrongTestIds.size){insight.innerHTML=`<div class="muted">${active?`${active}번은 현재 비교 기록에서 반복 오답이 아닙니다.`:'문항 번호를 누르면 시험별 기록을 봅니다.'}</div>`;return}
- const history=[...stat.entries].sort((a,b)=>b.test.date.localeCompare(a.test.date));insight.innerHTML=`<div class="question-focus"><b>${active}번 · ${stat.wrongTestIds.size}/${pattern.attempts}회 오답${stat.uncertainTestIds.size?` · 애매 정답 ${stat.uncertainTestIds.size}회`:''}</b><span>${stat.wrongTestIds.size>=2?'반복 확인 문항입니다. 원인과 재풀이 결과를 남겨야 해결로 바뀝니다.':'다음 기록에서 반복 여부를 다시 확인합니다.'}</span></div><div class="question-history">${history.map(({test,question})=>`<div><b>${test.date.slice(5).replace('-','.')} · ${esc(testSourceLabel(test.source))}</b><span>${QUESTION_STATUS_LABELS[question.status]}${question.type?` · ${esc(question.type)}`:''}${question.cause?` · ${esc(question.cause)}`:''} · ${reviewStatusLabel(question)}</span>${question.retryState!=='resolved'?`<button class="btn ghost small review-open" data-test-id="${test.id}">분석</button>`:''}</div>`).join('')}</div>`
+ const history=[...stat.entries].sort((a,b)=>b.test.date.localeCompare(a.test.date));insight.innerHTML=`<div class="question-focus"><b>${active}번 · ${stat.wrongTestIds.size}/${pattern.attempts}회 오답${stat.uncertainTestIds.size?` · 애매 정답 ${stat.uncertainTestIds.size}회`:''}</b><span>${stat.wrongTestIds.size>=2?'반복 확인 문항입니다. 원인과 재풀이 결과를 남겨야 해결로 바뀝니다.':'다음 기록에서 반복 여부를 다시 확인합니다.'}</span></div><div class="question-history">${history.map(({test,question})=>`<div><b>${test.date.slice(5).replace('-','.')} · ${esc(testSourceLabel(test.source))}</b><span>${QUESTION_STATUS_LABELS[question.status]}${question.type?` · ${esc(question.type)}`:''}${question.cause?` · ${esc(question.cause)}`:''} · ${reviewStatusLabel(question)}</span>${question.retryState!=='resolved'?`<button class="btn ghost small review-open" data-test-id="${esc(test.id)}">분석</button>`:''}</div>`).join('')}</div>`
 }
 function reviewQueueRow({test,question},{compact=false}={}){
  const due=question.retryDue||addDays(test.date,1),label=`${question.subject} ${question.number}번`,dueText=due<=todayDate()?`재풀이일 ${due.slice(5).replace('-','.')} · 지금 확인`:`재풀이일 ${due.slice(5).replace('-','.')}`;
- return `<div class="review-row${compact?' compact':''}"><div><b>${label}</b><span>${esc(testRecordShortLabel(test))}${question.cause?` · ${esc(question.cause)}`:''}</span><small>${dueText}</small></div><div class="row"><button class="btn ghost small review-open" data-test-id="${test.id}">분석</button>${compact?'':`<button class="btn ghost small review-task" data-test-id="${test.id}" data-question-id="${question.id}">오늘 할 일</button><button class="btn good small review-resolve" data-test-id="${test.id}" data-question-id="${question.id}">해결</button><button class="btn ghost small review-reschedule" data-test-id="${test.id}" data-question-id="${question.id}">D+3</button>`}</div></div>`
+ return `<div class="review-row${compact?' compact':''}"><div><b>${label}</b><span>${esc(testRecordShortLabel(test))}${question.cause?` · ${esc(question.cause)}`:''}</span><small>${dueText}</small></div><div class="row"><button class="btn ghost small review-open" data-test-id="${esc(test.id)}">분석</button>${compact?'':`<button class="btn ghost small review-task" data-test-id="${esc(test.id)}" data-question-id="${esc(question.id)}">오늘 할 일</button><button class="btn good small review-resolve" data-test-id="${esc(test.id)}" data-question-id="${esc(question.id)}">해결</button><button class="btn ghost small review-reschedule" data-test-id="${esc(test.id)}" data-question-id="${esc(question.id)}">D+3</button>`}</div></div>`
 }
 function renderReviewQueues(subject='all'){
  const pending=reviewEntries({subject}),allPending=reviewEntries({});const main=$('#reviewQueue'),compact=$('#reviewQueueCompact');if(main)main.innerHTML=pending.length?`<h4 class="queue-title">재풀이 대기 ${pending.length}문항</h4>${pending.slice(0,8).map(x=>reviewQueueRow(x)).join('')}${pending.length>8?`<div class="muted">나머지 ${pending.length-8}문항은 시험 기록에서 분석할 수 있습니다.</div>`:''}`:'<div class="muted">현재 재풀이 대기 문항이 없습니다.</div>';if(compact)compact.innerHTML=allPending.length?allPending.slice(0,5).map(x=>reviewQueueRow(x,{compact:true})).join(''):`<div class="muted">대기 문항이 없습니다.</div>`
@@ -1367,15 +1450,15 @@ function renderAnalysis__impl1(){
 }
 
 function renderUndoList(){
- const h=undoHistory(),box=$('#undoList');if(!box)return;box.innerHTML=h.length?h.map(x=>`<div class="undo-item"><span>${new Date(x.at).toLocaleString('ko-KR')} 이전 상태</span><button class="btn ghost small undo-btn" data-id="${x.id}">되돌리기</button></div>`).join(''):'<div class="muted">되돌릴 변경이 없습니다.</div>';$$('.undo-btn').forEach(b=>b.onclick=()=>restoreUndo(b.dataset.id))
+ const h=undoHistory(),box=$('#undoList');if(!box)return;box.innerHTML=h.length?h.map(x=>`<div class="undo-item"><span>${new Date(x.at).toLocaleString('ko-KR')} 이전 상태</span><button class="btn ghost small undo-btn" data-id="${esc(x.id)}">되돌리기</button></div>`).join(''):'<div class="muted">되돌릴 변경이 없습니다.</div>';$$('.undo-btn').forEach(b=>b.onclick=()=>restoreUndo(b.dataset.id))
 }
 function renderSettings__impl1(){
  $('#lectureDailyCap').value=DB.settings.lectureDailyCap||5;
- $('#periodTimeSettings').innerHTML=Array.from({length:7},(_,i)=>{const p=i+1,t=DB.settings.periodTimes[p]||{};return `<div class="period-box"><b>${p}교시</b><input class="input period-start" data-p="${p}" type="time" value="${t.start||''}"><input class="input period-end" data-p="${p}" type="time" value="${t.end||''}"></div>`}).join('');
+ $('#periodTimeSettings').innerHTML=Array.from({length:7},(_,i)=>{const p=i+1,t=DB.settings.periodTimes[p]||{};return `<div class="period-box"><b>${p}교시</b><input class="input period-start" data-p="${esc(p)}" type="time" value="${esc(t.start||'')}"><input class="input period-end" data-p="${esc(p)}" type="time" value="${esc(t.end||'')}"></div>`}).join('');
  const kb=Math.round(approximateStorageBytes()/1024);renderTrash();renderUndoList();$('#versionInfo').innerHTML=`<code>App ${APP_VERSION}<br>Data schema ${SCHEMA_VERSION}<br>Build ${BUILD}<br>저장소 약 ${kb.toLocaleString()} KB<br>9모 ${EXAM9}<br>수능 ${CSAT}</code>`;$('#diagnosticResult').innerHTML='<div class="muted">전체 검사는 연결·중복·시간 겹침·자동화·수면 동기화·저장 용량을 확인합니다.</div>'
 }
 function savePeriodTimes(){
- for(let p=1;p<=7;p++){DB.settings.periodTimes[p]={start:$(`.period-start[data-p="${p}"]`).value,end:$(`.period-end[data-p="${p}"]`).value}}
+ for(let p=1;p<=7;p++){DB.settings.periodTimes[p]={start:$(`.period-start[data-p="${esc(p)}"]`).value,end:$(`.period-end[data-p="${esc(p)}"]`).value}}
  saveDB();Object.keys(DB.schedules).forEach(date=>{if([1,2,3,4,5].includes(parseDate(date).getDay()))DB.schedules[date]=mergeSchedule(date,DB.schedules[date])});saveDB();alert('평일 교시 시각을 저장했습니다.');renderSettings();if($('#planner').classList.contains('active'))renderPlanner();if($('#week').classList.contains('active'))renderWeek()
 }
 function runDiagnostics__impl1(){
@@ -1391,14 +1474,14 @@ function runDiagnostics__impl1(){
  $('#diagnosticResult').innerHTML=problems.length?`<b>${problems.length}개 확인 필요</b><ul class="diagnostic-list">${problems.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`:`<b>정상</b><br>연결 · 중복 · 시간 · 자동화 · 수면 동기화 · 저장 용량 검사 이상 없음`
 }
 function renderTrash(){
- cleanupTrash();const box=$('#trashList');box.innerHTML=DB.trash.length?DB.trash.map(x=>`<div class="trash-item"><div class="trash-top"><div><b>${trashTitle(x)}</b><div class="task-meta">${new Date(x.deletedAt).toLocaleString('ko-KR')}</div></div><button class="btn ghost small trash-restore" data-id="${x.id}">복원</button></div></div>`).join(''):'<div class="muted">휴지통이 비어 있습니다.</div>';$$('.trash-restore').forEach(b=>b.onclick=()=>restoreTrash(b.dataset.id))
+ cleanupTrash();const box=$('#trashList');box.innerHTML=DB.trash.length?DB.trash.map(x=>`<div class="trash-item"><div class="trash-top"><div><b>${trashTitle(x)}</b><div class="task-meta">${new Date(x.deletedAt).toLocaleString('ko-KR')}</div></div><button class="btn ghost small trash-restore" data-id="${esc(x.id)}">복원</button></div></div>`).join(''):'<div class="muted">휴지통이 비어 있습니다.</div>';$$('.trash-restore').forEach(b=>b.onclick=()=>restoreTrash(b.dataset.id))
 }
 function trashTitle(x){
  if(x.type==='task')return`할 일 · ${x.data.subject} ${x.data.name}`;if(x.type==='block')return`시간 블록 · ${x.data.name}`;if(x.type==='lectureCourse')return`인강 · ${x.data.display}`;if(x.type==='book')return`문제집 · ${x.data.name}`;if(x.type==='automation')return'자동화 규칙';if(x.type==='test')return`시험 · ${x.data.name||''}`;if(x.type==='waiting')return`대기함 · ${x.data.name}`;return x.type
 }
 function restoreTrash(id){
  const i=DB.trash.findIndex(x=>x.id===id);if(i<0)return;const x=DB.trash[i];
- if(x.type==='task'){const date=x.context.date||viewDate;const t=deep(x.data);if(tasksFor(date).some(a=>a.id===t.id))t.id=uid();tasksFor(date).push(t)}
+ if(x.type==='task'){const date=x.context.date||viewDate;const t=deep(x.data);if(tasksFor(date).some(a=>a.id===t.id))t.id=uid();tasksFor(date).push(t);if(DB.deletedTasks)delete DB.deletedTasks[x.data.id]}
  if(x.type==='block'){const date=x.context.date||viewDate;const b=deep(x.data);if(ensureSchedule(date).some(a=>a.id===b.id))b.id=uid();DB.schedules[date].push(b);DB.schedules[date]=sortBlocks(DB.schedules[date])}
  if(x.type==='lectureCourse'){const c=deep(x.data);if(DB.customLectures.some(a=>a.key===c.key))c.key='custom-'+uid();DB.customLectures.push(c)}
  if(x.type==='book'){const b=deep(x.data);if(DB.books.some(a=>a.id===b.id))b.id=uid();DB.books.push(b)}
@@ -1416,20 +1499,20 @@ function importData__impl1(file){
 }
 
 function openNowMode(){
- const date=todayDate();viewDate=date;const cb=currentBlock(date),nb=nextBlock(date),b=cb||nb,tasks=b?(b.taskIds||[]).map(id=>taskById(date,id)).filter(Boolean):tasksFor(date).filter(t=>!t.done).slice(0,1);
+ const date=todayDate();viewDate=date;const cb=currentBlock(date),nb=nextBlock(date),b=cb||nb,tasks=b?(b.taskIds||[]).map(id=>taskById(date,id)).filter(t=>t&&!t.deferred):tasksFor(date).filter(t=>!t.done&&!t.deferred).slice(0,1);
  const n=new Date();$('#nowClock').textContent=`${String(n.getHours()).padStart(2,'0')}:${String(n.getMinutes()).padStart(2,'0')}`;$('#nowBlockTitle').textContent=cb?`${cb.name} · 지금`:nb?`${nb.name} · 다음 블록`:'지금 할 것';
- $('#nowTasks').innerHTML=tasks.length?tasks.map(t=>`<div class="task" style="text-align:left"><b>${esc(t.subject)} · ${esc(t.name)}</b><div class="task-meta">${esc(t.material||'')}</div><div class="row" style="margin-top:8px"><button class="btn primary small now-complete" data-id="${t.id}">${t.done?'완료 해제':'완료'}</button></div></div>`).join(''):'<div class="muted">현재 연결된 할 일이 없습니다.</div>';$$('.now-complete').forEach(x=>x.onclick=()=>{const t=taskById(date,x.dataset.id);setTaskDoneInternal(date,t.id,!t.done);openNowMode();renderDashboard()});showModal('nowModal')
+ $('#nowTasks').innerHTML=tasks.length?tasks.map(t=>`<div class="task" style="text-align:left"><b>${esc(t.subject)} · ${esc(t.name)}</b><div class="task-meta">${esc(t.material||'')}</div><div class="row" style="margin-top:8px"><button class="btn primary small now-complete" data-id="${esc(t.id)}">${t.done?'완료 해제':'완료'}</button></div></div>`).join(''):'<div class="muted">현재 연결된 할 일이 없습니다.</div>';$$('.now-complete').forEach(x=>x.onclick=()=>{const t=taskById(date,x.dataset.id);setTaskDoneInternal(date,t.id,!t.done);openNowMode();renderDashboard()});showModal('nowModal')
 }
 function togglePlanLock(){
  const locking=!DB.planLocks[viewDate];
- if(locking){const known=tasksFor(viewDate).filter(t=>!t.done).reduce((s,t)=>s+(Number(t.minutes)||0),0),p=plannedStudy(viewDate).minutes;if(p&&known>p&&!confirm(`할 일 예상 ${minuteLabel(known)}, 시간표 자습 ${minuteLabel(p)}로 ${minuteLabel(known-p)} 초과입니다. 그래도 오늘 계획을 확정할까요?`))return}
+ if(locking){const known=tasksFor(viewDate).filter(t=>!t.done&&!t.deferred).reduce((s,t)=>s+(Number(t.minutes)||0),0),p=plannedStudy(viewDate).minutes;if(p&&known>p&&!confirm(`할 일 예상 ${minuteLabel(known)}, 시간표 자습 ${minuteLabel(p)}로 ${minuteLabel(known-p)} 초과입니다. 그래도 오늘 계획을 확정할까요?`))return}
  DB.planLocks[viewDate]=locking;saveDB();renderDashboard()
 }
 
 function openCloseDay__impl1(){
  if(viewDate>todayDate()){alert('미래 날짜는 실제로 지난 뒤 마감할 수 있습니다. 계획은 미래 집계에서 제외됩니다.');return}
  $('#closeDateBadge').textContent=fmtDate(viewDate);const p=plannedStudy(viewDate).minutes,a=autoActualStudy(viewDate),f=finalStudy(viewDate);$('#closeStudySummary').innerHTML=`<div><span>계획 자습</span><b>${minuteLabel(p)}</b></div><div><span>자동 실제</span><b>${minuteLabel(a)}</b></div><div><span>현재 최종</span><b>${minuteLabel(f)}</b></div>`;$('#closeStudyOverride').value=(f/60).toFixed(1);
- const unfinished=tasksFor(viewDate).filter(t=>!t.done);$('#closeUnfinished').innerHTML=unfinished.length?`<h3 class="subhead">미완료 ${unfinished.length}개</h3>`+unfinished.map(t=>`<div class="close-choice"><div><b>${esc(t.subject)} · ${esc(t.name)}</b><div class="task-meta">${esc(t.material||'')}</div></div><select class="input close-action" data-id="${t.id}"><option value="tomorrow">내일</option><option value="waiting">대기함</option><option value="skip">건너뛰기</option></select></div>`).join(''):'<div class="muted">미완료 할 일이 없습니다.</div>';showModal('closeDayModal')
+ const unfinished=tasksFor(viewDate).filter(t=>!t.done&&!t.deferred);$('#closeUnfinished').innerHTML=unfinished.length?`<h3 class="subhead">미완료 ${unfinished.length}개</h3>`+unfinished.map(t=>`<div class="close-choice"><div><b>${esc(t.subject)} · ${esc(t.name)}</b><div class="task-meta">${esc(t.material||'')}</div></div><select class="input close-action" data-id="${esc(t.id)}"><option value="tomorrow">내일</option><option value="waiting">대기함</option><option value="skip">건너뛰기</option></select></div>`).join(''):'<div class="muted">미완료 할 일이 없습니다.</div>';showModal('closeDayModal')
 }
 function nextDate(date){const d=parseDate(date);d.setDate(d.getDate()+1);return ymd(d)}
 function confirmCloseDay__impl1(){
@@ -1446,7 +1529,7 @@ function todayRecordText(date=viewDate){
  const p=plannedStudy(date).minutes,a=autoActualStudy(date),f=finalStudy(date),list=tasksFor(date),u=dailyCompletion(date),c=DB.condition[date]||{},session=sleepSession(date),stage=activeStage(date);
  return `[曆象 일일 기록]\n날짜: ${date}\n단계: ${stage.title}\n목표: 전과목 만점\n순공: 계획 ${minuteLabel(p)} / 자동 ${minuteLabel(a)} / 최종 ${minuteLabel(f)}\n완주: ${u.total?`${u.done}/${u.total} (${u.rate}%)`:'미기록'}${u.carried||u.waiting?` · 이월 ${u.carried+u.waiting}`:''}\n미완료: ${list.filter(t=>!t.done).map(t=>`${t.subject} ${t.name}`).join(' / ')||'없음'}\n수면: ${calcSleep(session.bed,session.wake)||'미입력'}\n컨디션: ${c.overall||'미입력'}`
 }
-async function copyText(text){try{await navigator.clipboard.writeText(text);alert('복사했습니다.')}catch{const ta=document.createElement('textarea');ta.value=text;document.body.appendChild(ta);ta.select();document.execCommand('copy');ta.remove();alert('복사했습니다.')}}
+async function copyText(text){try{await navigator.clipboard.writeText(text);alert('복사했습니다.');return true}catch{const ta=document.createElement('textarea');ta.value=text;ta.setAttribute('aria-label','복사할 기록');document.body.appendChild(ta);ta.select();let ok=false;try{ok=document.execCommand('copy')===true}catch{}ta.remove();if(ok){alert('복사했습니다.');return true}const box=$('#y24ReportText');if(box){box.value=text;showModal('y24ReportModal');box.focus?.();box.select?.();}alert('자동 복사를 할 수 없습니다. 선택된 내용을 길게 눌러 복사하세요.');return false}}
 function renderVersionStatus__impl1(){$('#runtimeStatus').textContent=`${APP_VERSION} · SW ${APP_VERSION}`} 
 
 function initPwaUpdate__impl1(){
@@ -1476,7 +1559,7 @@ function bindEvents__impl1(){
  $('#conditionDate').onchange=renderCondition;$('#bedTime').onchange=()=>$('#sleepTotal').value=calcSleep($('#bedTime').value,$('#wakeTime').value);$('#wakeTime').onchange=()=>$('#sleepTotal').value=calcSleep($('#bedTime').value,$('#wakeTime').value);$('#saveCondition').onclick=saveCondition;$('#analysisMonth').onchange=renderAnalysis;
  $('#saveSettings').onclick=()=>{DB.settings.lectureDailyCap=Number($('#lectureDailyCap').value)||5;saveDB();alert('저장했습니다.')};$('#savePeriodTimes').onclick=savePeriodTimes;$('#clearPeriodTimes').onclick=()=>{$$('.period-start,.period-end').forEach(x=>x.value='')};$('#runDiagnostics').onclick=runDiagnostics;$('#exportData').onclick=exportData;$('#importData').onchange=e=>{if(e.target.files[0])importData(e.target.files[0])};
  $('#confirmCloseDay').onclick=confirmCloseDay;$('#copyTodayRecord').onclick=()=>copyText(todayRecordText());
- $$('.modal-close').forEach(b=>b.onclick=()=>b.closest('.modal-back').classList.remove('show'));$$('.modal-back').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('show')}));
+ $$('.modal-close').forEach(b=>b.onclick=()=>requestModalClose(b.closest('.modal-back').id));$$('.modal-back').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)requestModalClose(m.id)}));
 }
 function init(){
  viewDate=todayDate();weekViewStart=mondayOf(viewDate);displayMonth=viewDate.slice(0,7);$('#cartDate').value=viewDate;$('#plannerDate').value=viewDate;$('#conditionDate').value=viewDate;$('#analysisMonth').value=displayMonth;bindEvents();renderVersionStatus();renderDashboard();initPwaUpdate();globalThis.YEOKSANG_STARTING=false;
@@ -1639,7 +1722,7 @@ function saveTestModal__impl2(){
 
 function patternOptions(value=''){return `<option value="">패턴 선택</option>${ERROR_PATTERNS.map(x=>`<option value="${esc(x)}"${x===value?' selected':''}>${esc(x)}</option>`).join('')}`}
 function answerOutcomeOptions(value=''){return ANSWER_OUTCOMES.map(x=>`<option value="${esc(x)}"${x===value?' selected':''}>${x||'선택'}</option>`).join('')}
-function renderProtocolReview(test){const box=$('#protocolReviewPanel');if(!box)return;const subjects=testSubjectRows(test).map(x=>x.subject);box.innerHTML=subjects.length?`<article class="protocol-review"><div class="card-head"><div><h4>이번 시험 규칙 준수</h4><div class="micro-label">규칙을 지켰는지만 체크합니다.</div></div></div>${subjects.map(s=>{const rules=DB.subjectProtocols?.[s]||[],checks=test.protocolChecks?.[s]||[];return `<div class="protocol-review-row"><b>${s}</b>${rules.length?rules.map((r,i)=>`<label class="inline"><input class="protocol-check" type="checkbox" data-sub="${s}" data-i="${i}" ${checks[i]===true?'checked':''}>${esc(r)}</label>`).join(''):'<span class="muted">등록된 규칙 없음</span>'}</div>`}).join('')}</article>`:''}
+function renderProtocolReview(test){const box=$('#protocolReviewPanel');if(!box)return;const subjects=testSubjectRows(test).map(x=>x.subject);box.innerHTML=subjects.length?`<article class="protocol-review"><div class="card-head"><div><h4>이번 시험 규칙 준수</h4><div class="micro-label">규칙을 지켰는지만 체크합니다.</div></div></div>${subjects.map(s=>{const rules=DB.subjectProtocols?.[s]||[],checks=test.protocolChecks?.[s]||[];return `<div class="protocol-review-row"><b>${s}</b>${rules.length?rules.map((r,i)=>`<label class="inline"><input class="protocol-check" type="checkbox" data-sub="${esc(s)}" data-i="${esc(i)}" ${checks[i]===true?'checked':''}>${esc(r)}</label>`).join(''):'<span class="muted">등록된 규칙 없음</span>'}</div>`}).join('')}</article>`:''}
 __impl_openTestReviewModal=openTestReviewModal__impl2;
 function openTestReviewModal__impl2(testId){
  const test=mutableTest(testId);if(!test)return;$('#testReviewId').value=test.id;$('#testReviewMeta').textContent=`${test.date} · ${testSourceLabel(test.source)} · ${test.name||'시험'} · 오류 패턴과 재발 방지`;renderProtocolReview(test);const questions=[...(test.questionRecords||[])].sort((a,b)=>a.subject.localeCompare(b.subject)||a.number-b.number),box=$('#testReviewQuestions');if(!questions.length){box.innerHTML='<div class="muted">문항 번호 기록이 없습니다.</div>';showModal('testReviewModal');return}box.innerHTML=SUBJECTS.map(subject=>{const list=questions.filter(q=>q.subject===subject);if(!list.length)return'';return `<section class="review-subject-group"><h4>${subject}</h4>${list.map(q=>`<article class="review-question-card" data-question-id="${esc(q.id)}"><div class="review-question-head"><b>${q.number}번</b><span class="kind-pill">${QUESTION_STATUS_LABELS[q.status]}</span><span>${reviewStatusLabel(q)}</span></div><div class="review-question-grid v90"><label>상태<select class="input review-q-status"><option value="wrong"${q.status==='wrong'?' selected':''}>틀림</option><option value="uncertain"${q.status==='uncertain'?' selected':''}>애매하지만 맞음</option></select></label><label>유형·단원<input class="input review-q-type" value="${esc(q.type)}"></label><label>직접 원인<select class="input review-q-cause">${reviewCauseOptions(q.cause)}</select></label><label>오류 패턴<select class="input review-q-pattern">${patternOptions(q.pattern)}</select></label><label>답 상태<select class="input review-q-answer">${answerOutcomeOptions(q.answerOutcome)}</select></label><label>재풀이일<input class="input review-q-due" type="date" value="${esc(q.retryDue)}"></label><label>결과<select class="input review-q-state"><option value="pending"${q.retryState!=='resolved'?' selected':''}>재풀이 대기</option><option value="resolved"${q.retryState==='resolved'?' selected':''}>해결</option></select></label></div><div class="pattern-chain"><label>발동 조건<input class="input review-q-trigger" value="${esc(q.trigger)}" placeholder="예: 복합 선지 + 시간 압박"></label><label>시험장에서 한 행동<input class="input review-q-behavior" value="${esc(q.behavior)}"></label><label>놓친 확인<input class="input review-q-missed" value="${esc(q.missedCheck)}"></label><label>근본 원인 가설<input class="input review-q-root" value="${esc(q.rootCause)}"></label><label class="wide">다음 시험 통제 규칙<input class="input review-q-control" value="${esc(q.controlRule)}" placeholder="다음 시험에서 실제로 지킬 한 문장"></label></div><label>메모<textarea class="input review-q-note" rows="2">${esc(q.note)}</textarea></label></article>`).join('')}</section>`}).join('');showModal('testReviewModal')

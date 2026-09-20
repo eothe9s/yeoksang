@@ -68,9 +68,9 @@ function renderRecoveryCenterV11(){
  V11_RECOVERY_CANDIDATES=v11RecoveryCandidates();
  const current=V11_RECOVERY_CANDIDATES.find(x=>x.source==='current'),best=V11_RECOVERY_CANDIDATES[0];
  const rows=V11_RECOVERY_CANDIDATES.map((c,i)=>{
-  const action=c.source==='current'?'<span class="badge">사용 중</span>':`<button class="btn primary small recovery-merge-btn" data-i="${i}">현재와 병합</button>`;
+  const action=c.source==='current'?'<span class="badge">사용 중</span>':`<button class="btn primary small recovery-merge-btn" data-i="${esc(i)}">현재와 병합</button>`;
   const bestClass=(c===best&&c.source!=='current')?' best':'';
-  return `<div class="recovery-row${bestClass}"><div><b>${esc(c.label)}</b><span>${esc(v11StatLine(c.stats))}</span></div><div class="row"><button class="btn ghost small recovery-preview-btn" data-i="${i}">비교</button>${action}</div></div>`;
+  return `<div class="recovery-row${bestClass}"><div><b>${esc(c.label)}</b><span>${esc(v11StatLine(c.stats))}</span></div><div class="row"><button class="btn ghost small recovery-preview-btn" data-i="${esc(i)}">비교</button>${action}</div></div>`;
  });
  box.innerHTML=rows.join('')||'<div class="empty-state">복구 후보가 없습니다.</div>';
  if(best&&current&&best.source!=='current'&&best.score>current.score*1.12)box.insertAdjacentHTML('afterbegin','<div class="banner warn">현재 데이터보다 풍부한 이전 안전본이 발견되었습니다. 먼저 비교한 뒤 병합하세요.</div>');

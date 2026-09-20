@@ -8,19 +8,19 @@
 <meta content="yes" name="apple-mobile-web-app-capable"/>
 <meta content="default" name="apple-mobile-web-app-status-bar-style"/>
 <meta content="曆象" name="apple-mobile-web-app-title"/>
-<link href="./manifest-v200.webmanifest?v=2400" rel="manifest"/>
+<link href="./manifest-v200.webmanifest?v=2500" rel="manifest"/>
 <link href="./icon-192.png" rel="apple-touch-icon"/>
-<link href="./styles-v200.css?v=2400" rel="stylesheet"/>
-<link href="./styles-v210.css?v=2400" rel="stylesheet"/>
+<link href="./styles-v200.css?v=2500" rel="stylesheet"/>
+<link href="./styles-v210.css?v=2500" rel="stylesheet"/>
 <title>曆象 · 수능 만점 운영체제</title>
-<link href="./styles-v240.css?v=2400" rel="stylesheet"/></head>
+<link href="./styles-v240.css?v=2500" rel="stylesheet"/></head>
 <body>
 <div class="update-banner hidden" id="updateBanner"><span>새 버전이 준비되었습니다.</span><button class="btn primary small" id="reloadUpdate">새로고침</button></div>
 <div class="app-shell">
 <aside class="sidebar">
 <div class="brand">
 <div aria-label="역상" class="brand-mark">曆</div>
-<div><h1>曆象</h1><span>v2.4</span></div>
+<div><h1>曆象</h1><span>v2.5</span></div>
 </div>
 <nav aria-label="주 메뉴" id="mainNav">
 <button class="active" data-page="dashboard">오늘</button>
@@ -364,7 +364,7 @@
 </section>
 <!-- SETTINGS -->
 <section class="page" id="settings">
-<div class="settings-title"><span>⚙︎</span><div><h3>설정·백업</h3></div></div>
+<article class="card" id="storageManager"></article>
 <div class="grid g2">
 <article class="card">
 <h3>백업·복원</h3>
@@ -384,7 +384,7 @@
 <label>시간표가 비어 있을 때 주말 fallback(h)<input class="input" id="weekendCapacitySetting" max="18" min="0" step="0.5" type="number"/></label>
 <label>마지막 자습 종료 시각<input class="input" id="studyCutoffSetting" type="time"/><span class="form-note">비우면 23:00 절대 경계만 적용</span></label>
 </div>
-<label>가용시간 계산<select class="input" id="capacityModeSetting"><option value="schedule">실제 시간표 우선</option><option value="manual">fallback 시간만 사용</option></select></label><label class="inline"><input id="automationEnabledSetting" type="checkbox"/> 기존 반복 자동화 사용 <span class="muted">기본 꺼짐</span></label>
+<label>가용시간 계산<select class="input" id="capacityModeSetting"><option value="schedule">실제 시간표 우선</option><option value="manual">수동 상한 적용</option></select></label><label class="inline"><input id="automationEnabledSetting" type="checkbox"/> 기존 반복 자동화 사용 <span class="muted">기본 꺼짐</span></label>
 <div class="micro-label">평일 취침 23:00 전 · 기상 06:30 전은 계획보다 우선합니다. 주말 기상 시각은 아직 고정하지 않습니다.</div>
 <button class="btn primary" id="saveSettings">설정 저장</button>
 </article>
@@ -405,7 +405,7 @@
 </article>
 </div>
 <article class="card">
-<div class="card-head"><div><h3>안전본 복원</h3><div class="micro-label">하루 첫 변경 직전과 기록 불러오기 직전 상태를 별도로 보관합니다.</div></div><span class="badge">자동</span></div>
+<div class="card-head"><div><h3>안전본 복원</h3><div class="micro-label">기존 안전본은 보존됩니다. 새 전체 사본은 자동 생성하지 않습니다.</div></div><span class="badge">보관본</span></div>
 <div id="safetySnapshotList"></div>
 </article>
 <article class="card">
@@ -417,7 +417,7 @@
 <div id="versionInfo"></div>
 </article>
 </section>
-<footer>曆象 · v2.4 · JS <span id="runtimeStatus">확인 중</span></footer>
+<footer>曆象 · v2.5 · JS <span id="runtimeStatus">확인 중</span></footer>
 </main>
 </div>
 <!-- TASK MODAL -->
@@ -570,17 +570,20 @@
 </div></div>
 <div aria-labelledby="y21MergeTitle" aria-modal="true" class="modal-back" id="y21MergeModal" role="dialog"><div class="modal"><h3 id="y21MergeTitle">기록 병합</h3><div id="y21MergeBody"></div><div class="y21-modal-actions"><button class="btn ghost modal-close">취소</button><button class="btn primary" id="y21ApplyMerge">선택대로 병합</button></div></div></div>
 <div aria-labelledby="analysisPackageTitle" aria-modal="true" class="modal-back" id="analysisPackageModal" role="dialog"><div class="modal wide"><div class="card-head"><div><h3 id="analysisPackageTitle">오답 분석 패키지</h3><div class="micro-label">원본 기록을 덮어쓰지 않고 증분으로 병합합니다.</div></div><button class="btn ghost small modal-close">닫기</button></div><div id="analysisPackagePreview"></div><div class="row end"><button class="btn ghost modal-close">취소</button><button class="btn primary" id="applyAnalysisPackage">가져오기</button></div></div></div>
-<script defer="" src="./boot-v220.js?v=2400"></script>
-<script defer="" src="./app-v200-core.js?v=2400"></script>
-<script defer="" src="./app-v200-engine.js?v=2400"></script>
-<script defer="" src="./app-v200-recovery.js?v=2400"></script>
-<script defer="" src="./app-v210.js?v=2400"></script>
-<script defer="" src="./app-v220-analysis.js?v=2400"></script>
-<script defer="" src="./app-v230.js?v=2400"></script>
-<script defer="" src="./app-v231.js?v=2400"></script>
+<script defer="" src="./boot-v220.js?v=2500"></script>
+<script defer="" src="./app-v200-core.js?v=2500"></script>
+<script defer="" src="./app-v200-engine.js?v=2500"></script>
+<script defer="" src="./app-v200-recovery.js?v=2500"></script>
+<script defer="" src="./app-v210.js?v=2500"></script>
+<script defer="" src="./app-v220-analysis.js?v=2500"></script>
+<script defer="" src="./app-v230.js?v=2500"></script>
+<script defer="" src="./app-v231.js?v=2500"></script>
 <select aria-hidden="true" hidden="" id="testKind"><option value="single">single</option><option value="full">full</option></select>
 <div class="modal-back" id="y24ExamDetailModal"><div class="modal wide"><div class="card-head"><h3 id="y24ExamTitle"></h3><button class="btn ghost small modal-close">닫기</button></div><div id="y24ExamDetail"></div><div class="row end" id="y24ExamActions"></div></div></div>
 <div class="modal-back" id="y24ActualModal"><div class="modal"><div class="card-head"><h3>공부 실적</h3><button class="btn ghost small modal-close">닫기</button></div><input id="y24WorkId" type="hidden"/><div class="y24-work-plan" id="y24WorkPlan"></div><div class="grid g2"><label>상태<select class="input" id="y24WorkStatus"><option value="complete">완료</option><option value="partial">일부 완료</option><option value="unstarted">미시작</option></select></label><label>실제 시간(분)<input class="input" id="y24ActualMinutes" min="0" step="any" type="number"/></label><label>실제 수량<input class="input" id="y24ActualQty" min="0" step="any" type="number"/></label><label>단위<input class="input" id="y24ActualUnit"/></label></div><label>실제 공부한 범위<input class="input" id="y24ActualRange"/></label><label>메모<textarea class="input" id="y24ActualNote" rows="2"></textarea></label><div class="row end"><button class="btn ghost" id="y24AsPlanned">분량은 계획대로</button><button class="btn primary" id="y24SaveActual">저장</button></div></div></div>
 <div class="modal-back" id="y24ReportModal"><div class="modal wide"><div class="card-head"><h3>오늘 기록</h3><button class="btn ghost small modal-close">닫기</button></div><textarea class="input" id="y24ReportText" readonly="" rows="18"></textarea><div class="row end"><button class="btn primary" id="y24CopyReport">복사</button></div></div></div>
-<script defer="" src="./app-v240.js?v=2400"></script></body>
+<script defer="" src="./app-v240.js?v=2500"></script>
+<script defer src="./record-safety.js?v=2500"></script>
+<script defer src="./view-tools.js?v=2500"></script>
+</body>
 </html>

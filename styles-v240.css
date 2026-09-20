@@ -40,3 +40,44 @@
  #testModal .grid.g3{grid-template-columns:repeat(2,minmax(0,1fr))!important}
 }
 @media(max-width:480px){#tests .test-subject-board{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
+/* v2.5: compact does not mean illegible or untappable. */
+:root{--muted:#526077;--accent:#526e9e}
+.muted,.form-note,.empty-state,.source-head span,.planner-quick-item span,.test-subject-card span,.test-subject-card small,.analysis-insight span,.curriculum-pressure span,.weekly-facts span,.chart-axis-label{color:#526077!important;fill:#526077!important}
+.eyebrow{color:#4c6591!important;font-size:11px!important}
+.learning-tab.active,.y24-exam-tabs .active{background:#546f9b!important;color:#fff!important}
+.task.done,.schedule-row.done,.automation-rule.paused,.month-day.future,.completion-row.future{opacity:1}
+.task.done .task-title{text-decoration:line-through;color:#526077}
+.schedule-row.done{background:#f7f9fc}
+.chart-segment-label{fill:#425169;font-size:11px;font-weight:600}.chart-segment-divider{stroke:#9ba6b9;stroke-dasharray:3 4;stroke-width:1}
+.hero-subline.v2-subline>[hidden]{display:none!important}
+.hero-subline.v2-subline{font-size:11px!important;color:#515e70!important}
+.hero-subline.v2-subline b{font-size:12px!important;color:#354459!important}
+.hero-metrics.v2-metrics .hero-metric span,.hero-metrics.v2-metrics .hero-metric small{font-size:11px!important;color:#526077!important}
+.top-date,.brand span,.task-meta,.y24-course-meta,.y24-exam-meta,.micro-label{font-size:11px!important;color:#526077!important}
+.btn,.text-link{min-width:32px!important;min-height:32px!important;font-size:12px!important}
+.btn.primary{background:#546f9b!important;border-color:#546f9b!important;color:#fff!important}
+.text-link{display:inline-flex;align-items:center;justify-content:center;padding:5px!important}
+:focus-visible{outline:2px solid #385884;outline-offset:3px}
+.btn.danger,.task-del.danger{color:#913f53!important}
+.hour-label{color:#526077!important;font-size:10px!important}
+.period-label{color:#526077!important;font-size:10px!important}
+footer,#runtimeStatus{color:#526077!important;font-size:10px!important}
+.grade-3{color:#85510f!important}
+.safety-copy{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid #e0e5ec;font-size:12px;overflow-wrap:anywhere}
+.safety-copy span{flex:1;min-width:0}.safety-copy input{min-width:20px;min-height:20px}
+.safety-copy-list{margin:12px 0}.course-risk.bad{color:#984456}.course-risk.warn{color:#826019}.course-risk{font-weight:700}
+.compact-disclosure{background:#fff;border:1px solid #e0e5ec;border-radius:12px;margin-bottom:12px;min-width:0}
+.compact-disclosure>summary{font-size:13px;font-weight:700;padding:15px;cursor:pointer}
+.compact-disclosure>article.card{border:0;box-shadow:none;margin:0;padding-top:4px}
+.source-disclosure>summary{font-size:12px;padding:8px 0;cursor:pointer}
+.source-disclosure[open]>.lecture-grid,.source-disclosure[open]>.subunit-grid{margin-top:8px}
+#storageManager p{font-size:12px;color:#425169}
+@media(max-width:700px){
+ #planner .planner-board{grid-template-columns:minmax(0,1fr)!important;justify-items:center!important}
+ #planner .planner-main,#planner .ten-planner,#planner .subject-legend,#unknownRegularStrip{width:100%!important;max-width:420px!important;min-width:0!important}
+ #planner .planner-layout,.planner-layout{grid-template-columns:minmax(0,1fr)!important}
+ #planner .planner-side,.planner-side{width:100%!important;min-width:0!important;max-width:100%!important}
+ #planner .planner-paper{width:100%!important;max-width:420px!important}
+ .hero-subline.v2-subline>span{white-space:normal!important}
+ .grid.g3{grid-template-columns:minmax(0,1fr)!important}
+}

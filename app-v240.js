@@ -1,12 +1,12 @@
 /* 曆象 v2.4 — compact views and explicit, preserved daily work records. */
 'use strict';
-const Y24_VERSION='2.4';
+const Y24_VERSION='2.5';
 const Y24_SOURCES=['평가원 모의평가','교육청 학력평가','수능','사설 모의고사'];
 const y24Num=v=>v==null||String(v).trim()===''?null:(Number.isFinite(Number(v))?Number(v):null);
 const y24Fmt=n=>n==null?'—':String(Math.round(n*10)/10);
 const y24Time=n=>n==null?'미기록':minuteLabel(n);
 const y24State={page:1,filter:'',exam:null,workDate:'',editor:null};
-function y24Commit(change){const before=deep(DB);change();if(saveDB())return true;DB=before;return false;}
+function y24Commit(change){return commitChange(change);}
 
 // Removed courses are tombstoned; source progress and historical task references survive.
 const y24CurriculumBase=curriculumRowsV90;
@@ -44,15 +44,15 @@ renderTrash=function(){
  if($('#y24EmptyTrash'))$('#y24EmptyTrash').disabled=!DB.trash.length;
 };
 __impl_renderProgress=function(){
- const plans=curriculumRowsV90().map(r=>coursePlanV10(r,viewDate)),load=curriculumLoadV90(viewDate);
+ const plans=curriculumRowsV90().map(r=>coursePlanV10(r,viewDate)),load=curriculumLoadV90(viewDate),riskOutlook=y231DeadlineOutlook(viewDate);
  $('#curriculumPressure').innerHTML=`<div><span>남은 필요량</span><b>${y231Hours(load.low/60,load.high/60)}</b></div><div><span>10.16까지 가용</span><b>${load.capacity.totalHours.toFixed(1)}h</b></div><div><span>마감 경과</span><b>${plans.filter(p=>p.needsReplan).length}개</b></div><div><span>오늘 마감 필요량</span><b>${y231Hours(load.todayLow,load.todayHigh)}</b></div>`;
- $('#progressCatalog').innerHTML=[...new Set(plans.map(p=>p.subject))].map(s=>`<section class="progress-group"><h4>${esc(s)}</h4><div class="progress-grid">${plans.filter(p=>p.subject===s).map(p=>{const w=p.workload,percent=p.total?pct(p.done,p.total):0;return`<article class="progress-card"><div class="progress-card-top"><span class="kind-pill">${p.kind==='lecture'?'인강':p.kind==='book'?'문제집':'과정'}</span><div class="row"><button class="text-link" data-y24-edit-course="${esc(p.id)}" data-kind="${esc(p.kind)}">수정</button><button class="text-link y24-danger" data-y24-del-course="${esc(p.id)}">삭제</button></div></div><h5>${esc(p.name)}</h5><div class="progress-line"><i style="width:${clamp(percent,0,100)}%"></i></div><b>${p.total==null?'분량 미정':`${p.done}/${p.total} · ${percent}%`}</b><div class="y24-course-meta"><span>마감 ${esc(p.target.slice(5))}</span><span>남은 시간 ${w.unknown?'미정':y231Hours(w.low/60,w.high/60)}</span><span>오늘 ${p.needsReplan?'재마감 필요':w.unknown?'미정':p.waitingRelease?'공개 전':y231Hours(p.todayLow/60,p.todayHigh/60)}</span>${w.included===false?'<span>계산 제외</span>':''}</div></article>`;}).join('')}</div></section>`).join('')||'<div class="empty-state">등록된 과정 없음</div>';
+ $('#progressCatalog').innerHTML=[...new Set(plans.map(p=>p.subject))].map(s=>`<section class="progress-group"><h4>${esc(s)}</h4><div class="progress-grid">${plans.filter(p=>p.subject===s).map(p=>{const risk=y230CourseRisk(p,viewDate,riskOutlook),w=p.workload,percent=p.total?pct(p.done,p.total):0;return`<article class="progress-card"><div class="progress-card-top"><span class="kind-pill">${p.kind==='lecture'?'인강':p.kind==='book'?'문제집':'과정'}</span><div class="row"><button class="text-link" data-y24-edit-course="${esc(p.id)}" data-kind="${esc(p.kind)}">수정</button><button class="text-link y24-danger" data-y24-del-course="${esc(p.id)}">삭제</button></div></div><h5>${esc(p.name)}</h5><div class="progress-line"><i style="width:${clamp(percent,0,100)}%"></i></div><b>${p.total==null?'분량 미정':`${p.done}/${p.total} · ${percent}%`}</b><div class="y24-course-meta"><span>마감 ${esc(p.target.slice(5))}</span><span>남은 시간 ${w.unknown?'미정':y231Hours(w.low/60,w.high/60)}</span><span>오늘 ${p.needsReplan?'재마감 필요':w.unknown?'미정':p.waitingRelease?'공개 전':y231Hours(p.todayLow/60,p.todayHigh/60)}</span>${['bad','warn'].includes(risk.className)?`<span class="course-risk ${risk.className}" title="${esc(risk.detail)}">${esc(risk.state)}</span>`:''}${w.included===false?'<span>계산 제외</span>':''}</div></article>`;}).join('')}</div></section>`).join('')||'<div class="empty-state">등록된 과정 없음</div>';
  $$('[data-y24-edit-course]').forEach(b=>b.onclick=()=>openCourseMeta(b.dataset.y24EditCourse,b.dataset.kind));$$('[data-y24-del-course]').forEach(b=>b.onclick=()=>y24DeleteCourse(b.dataset.y24DelCourse));
 };
 
 // Reports use per-day snapshots, never schedule minutes as task actual minutes.
 function y24TaskSnapshot(t){
- return {id:t.id,subject:t.subject,name:t.name,material:t.material||'',minutes:y24Num(t.minutes)>0?Number(t.minutes):null,quantity:y24Num(t.plannedQuantity),unit:t.quantityUnit||'',range:t.plannedRange||'',components:(t.components||[]).map(c=>({label:c.label||c.name||c.ref||'',done:!!c.done})),done:!!t.done,note:t.note||''};
+ return {id:t.id,subject:t.subject,name:t.name,material:t.material||'',minutes:y24Num(t.minutes)>0?Number(t.minutes):null,quantity:y24Num(t.plannedQuantity),unit:t.quantityUnit||'',range:t.plannedRange||'',components:(t.components||[]).map(c=>({label:c.label||c.name||c.ref||'',done:!!c.done})),done:!!t.done,deferred:t.deferred?{kind:t.deferred.kind,targetDate:t.deferred.targetDate||''}:null,note:t.note||''};
 }
 function y24CaptureChanges(previous){
  const dates=new Set([...Object.keys(previous.tasks||{}),...Object.keys(DB.tasks||{})]);
@@ -80,8 +80,8 @@ function y24SyncActualStatus(date,id){const a=DB.dayWork?.[date]?.entries?.[id]?
 const y24SetDone=setTaskDoneInternal;
 setTaskDoneInternal=function(date,id,done){const a=DB.dayWork?.[date]?.entries?.[id]?.actual;if(a)a.status=done?'complete':(a.minutes>0||a.quantity>0||a.range?'partial':'unstarted');return y24SetDone(date,id,done);};
 const y24SetComponent=setTaskComponentDone;
-setTaskComponentDone=function(date,id,cid,done){y24SetComponent(date,id,cid,done);const a=DB.dayWork?.[date]?.entries?.[id]?.actual;if(a){y24SyncActualStatus(date,id);saveDB();}};
-function y24WorkLabel(r){return (r.extra?'추가 · ':'')+({complete:'완료',partial:'일부 완료',unstarted:'미시작',unrecorded:'실적 미입력'}[y24WorkStatus(r)])+(r.removed?' · 이월/제외':'');}
+setTaskComponentDone=function(date,id,cid,done){return commitChange(()=>{y24SetComponent(date,id,cid,done);y24SyncActualStatus(date,id);});};
+function y24WorkLabel(r){return (r.extra?'추가 · ':'')+({complete:'완료',partial:'일부 완료',unstarted:'미시작',unrecorded:'실적 미입력'}[y24WorkStatus(r)])+(r.removed?' · 삭제':r.latest?.deferred?' · '+({waiting:'대기',carry:'이월',skip:'보류'}[r.latest.deferred.kind]||'보류'):'');}
 function y24PlannedRange(p){return p.range||p.components?.map(c=>c.label).filter(Boolean).join(', ')||p.name;}
 function y24Comparison(r){
  const p=r.original,a=r.actual||{},pq=y24Num(p.quantity),aq=y24Num(a.quantity),pm=y24Num(p.minutes),am=y24Num(a.minutes),parts=[];
@@ -95,11 +95,14 @@ const y24TaskOpen=openTaskModal;
 openTaskModal=function(t=null){y24TaskOpen(t);$('#y24PlanQty').value=t?.plannedQuantity??'';$('#y24PlanUnit').value=t?.quantityUnit||'';$('#y24PlanRange').value=t?.plannedRange||'';};
 const y24TaskSave=saveTaskModal;
 saveTaskModal=function(){
- const name=$('#taskName').value.trim();if(!name)return y24TaskSave();const qty=y24Num($('#y24PlanQty').value);if(qty!=null&&qty<0){alert('수량은 0 이상이어야 합니다.');return;}
- let id=$('#taskId').value;const before=new Set((DB.tasks[viewDate]||[]).map(t=>t.id));
- if(id){const t=taskById(viewDate,id);if(t)Object.assign(t,{plannedQuantity:qty,quantityUnit:$('#y24PlanUnit').value.trim(),plannedRange:$('#y24PlanRange').value.trim()});}
- y24TaskSave();
- if(!id){const t=(DB.tasks[viewDate]||[]).find(t=>!before.has(t.id));if(t){Object.assign(t,{plannedQuantity:qty,quantityUnit:$('#y24PlanUnit').value.trim(),plannedRange:$('#y24PlanRange').value.trim()});const r=DB.dayWork?.[viewDate]?.entries?.[t.id];if(r)r.original=y24TaskSnapshot(t);saveDB();}}
+ const id=$('#taskId').value,name=$('#taskName').value.trim(),qty=y24Num($('#y24PlanQty').value),minutes=Number($('#taskMinutes').value||0);
+ if(!name){alert('할 일을 입력하세요.');return;}
+ if((qty!=null&&qty<0)||!Number.isFinite(minutes)||minutes<0||minutes>1440){alert('분량과 시간을 확인하세요.');return;}
+ if(y24Commit(()=>{
+  const patch={subject:$('#taskSubject').value,priority:$('#taskPriority').value,minutes,splitMode:$('#taskSplitMode')?.value==='contiguous'?'contiguous':'flex',name,material:$('#taskMaterial').value.trim(),note:$('#taskNote').value.trim(),plannedQuantity:qty,quantityUnit:$('#y24PlanUnit').value.trim(),plannedRange:$('#y24PlanRange').value.trim()};
+  if(id){const t=taskById(viewDate,id);if(!t)throw Error('수정할 할 일이 없습니다.');Object.assign(t,patch);if(t.components?.length===1&&t.components[0].kind==='manual')t.components[0].label=name;}
+  else tasksFor(viewDate).push(normalizeImportedTask({...patch,id:uid(),done:false,components:[{id:uid(),kind:'manual',label:name,done:false}]}));
+ })){hideModal('taskModal');renderDashboard();}
 };
 function y24OpenActual(id,date=viewDate){
  const r=y24WorkRows(date).find(r=>r.id===id);if(!r)return;y24State.workDate=date;$('#y24WorkId').value=id;
@@ -111,7 +114,7 @@ function y24SaveActual(){
  const date=y24State.workDate,id=$('#y24WorkId').value,r=y24WorkRows(date).find(x=>x.id===id);if(!r)return;
  const minutes=y24Num($('#y24ActualMinutes').value),quantity=y24Num($('#y24ActualQty').value);if((minutes!=null&&minutes<0)||(quantity!=null&&quantity<0)){alert('시간·수량은 0 이상이어야 합니다.');return;}
  if(y24Commit(()=>{DB.dayWork=DB.dayWork||{};const d=DB.dayWork[date]||(DB.dayWork[date]={startedAt:Date.now(),entries:{}});d.entries[id]={...r,actual:{status:$('#y24WorkStatus').value,minutes,quantity,unit:$('#y24ActualUnit').value.trim(),range:$('#y24ActualRange').value.trim(),note:$('#y24ActualNote').value.trim(),at:Date.now()}};
-  const t=(DB.tasks[date]||[]).find(t=>t.id===id);if(t){const status=$('#y24WorkStatus').value;if(status==='complete'){t.done=true;(t.components||[]).forEach(c=>syncComponentSource(c,true));}else if(status==='unstarted'){t.done=false;(t.components||[]).forEach(c=>syncComponentSource(c,false));}else if(!(t.components||[]).length)t.done=false;}
+  const t=(DB.tasks[date]||[]).find(t=>t.id===id);if(t){retainDailyBasis(date);const status=$('#y24WorkStatus').value;t.actualStatus=status;t.done=status==='complete';if(status==='complete'){delete t.deferred;DB.waiting=DB.waiting.filter(w=>w.origin?.date!==date||w.origin?.id!==id);(t.components||[]).forEach(c=>syncComponentSource(c,true));}else if(status==='unstarted')(t.components||[]).forEach(c=>syncComponentSource(c,false));}
  })){hideModal('y24ActualModal');y24RenderDayWork();renderDashboard();}
 }
 function y24RenderDayWork(){const el=$('#y24DayWork');if(!el)return;el.innerHTML=y24WorkRows(viewDate).map(r=>`<div class="y24-work-row"><div><b>${esc(r.original.subject)} · ${esc(r.original.name)}</b><span>${esc(y24WorkLabel(r))}${y24Comparison(r)?' · '+esc(y24Comparison(r)):''}</span></div><button class="btn ghost small" data-y24-work="${esc(r.id)}">실적</button></div>`).join('')||'<div class="empty-state">기록 없음</div>';$$('[data-y24-work]').forEach(b=>b.onclick=()=>y24OpenActual(b.dataset.y24Work));}
@@ -120,7 +123,7 @@ __impl_openCloseDay=function(){y24CloseOpen();if(viewDate>todayDate())return;$('
 function y24AddExtra(){const name=prompt('추가로 공부한 내용');if(!name?.trim())return;const id=uid(),subject=prompt('과목','국어');if(subject===null)return;const p={id,subject:subject.trim()||'기타',name:name.trim(),material:'',quantity:null,unit:'',range:'',minutes:null,done:false,components:[]};if(y24Commit(()=>{DB.dayWork=DB.dayWork||{};const d=DB.dayWork[viewDate]||(DB.dayWork[viewDate]={startedAt:Date.now(),entries:{}});d.entries[id]={original:p,latest:p,extra:true,capturedAt:Date.now()};})){y24RenderDayWork();y24OpenActual(id);}}
 todayRecordText=function(date=viewDate){
  const rows=y24WorkRows(date),comp=dailyCompletion(date),cond=DB.condition[date]||{},session=sleepSession(date),knownActual=rows.filter(r=>r.actual?.minutes!=null),mins=knownActual.reduce((s,r)=>s+r.actual.minutes,0),planned=rows.filter(r=>!r.extra&&r.original.minutes!=null).reduce((s,r)=>s+r.original.minutes,0);
- const lines=[`[曆象 일일 기록]`,`날짜: ${date}`,`목표: 수능 만점`,`원래 할 일 예상: ${minuteLabel(planned)}${rows.some(r=>!r.extra&&r.original.minutes==null)?' + 시간 미정':''}`,`직접 기록한 실제: ${minuteLabel(mins)} (${knownActual.length}/${rows.length}개 시간 입력)`,`하루 순공 기록: ${Object.hasOwn(DB.studyOverrides||{},date)?minuteLabel(DB.studyOverrides[date])+' · 직접 확정':minuteLabel(autoActualStudy(date))+' · 시간표 기준 추정'}`,`완주: ${comp.total?`${comp.done}/${comp.total} (${comp.rate}%)`:'미기록'}`,''];
+ const lines=[`[曆象 일일 기록]`,`날짜: ${date}`,`목표: 수능 만점`,`원래 할 일 예상: ${minuteLabel(planned)}${rows.some(r=>!r.extra&&r.original.minutes==null)?' + 시간 미정':''}`,`직접 기록한 실제: ${minuteLabel(mins)} (${knownActual.length}/${rows.length}개 시간 입력)`,`하루 순공 기록: ${minuteLabel(finalStudy(date))+' · '+studyTotal(date).source}`,`완주: ${comp.total?`${comp.done}/${comp.total} (${comp.rate}%)`:'미기록'}`,''];
  for(const r of rows){const p=r.original,a=r.actual||{},latest=r.latest||p;
   lines.push(`[${y24WorkLabel(r)}] ${p.subject} · ${p.name}${p.material?' / '+p.material:''}`);
   lines.push(`계획: ${y24PlannedRange(p)}${p.quantity!=null?` · ${p.quantity}${p.unit}`:''} / ${p.minutes==null?'시간 미정':minuteLabel(p.minutes)}`);
@@ -178,9 +181,9 @@ function y24RenderExamList(){
 }
 function y24OpenExam(key){
  const e=y24Exams().find(e=>e.key===key);if(!e)return;y24State.exam=key;const t=e.record;$('#y24ExamTitle').textContent=y24ExamTitle(t);
- $('#y24ExamDetail').innerHTML=`<div class="y24-detail-meta">${esc(e.date.label)}${y24Source(t)?' · '+esc(y24Source(t)):''} · ${y24ExamStatus(e)}${e.archive?' · 오답파일 분석':''}</div><div class="y24-detail-scores">${y24Rows(e).map(r=>`<div><b>${esc(r.subject)}</b><strong>${r.score==null?'—':r.score+'점'}</strong><span>${r.grade?r.grade+'등급':'등급 미입력'}${r.minutes!=null?' · '+r.minutes+'분':''}</span></div>`).join('')}</div>${t.memo?`<p class="y24-note">${esc(t.memo)}</p>`:''}${e.archive?`<div class="archive-q-list">${(t.questions||[]).map((q,i)=>`${y230ArchiveQuestionRow(t,q)}${y220HasQuestionNumber(q)?`<button class="btn ghost small" data-y24-reactivate="${i}">이 문항 다시 점검</button>`:''}`).join('')}</div>`:''}`;
+ $('#y24ExamDetail').innerHTML=`<div class="y24-detail-meta">${esc(e.date.label)}${y24Source(t)?' · '+esc(y24Source(t)):''} · ${y24ExamStatus(e)}${e.archive?' · 오답파일 분석':''}</div><div class="y24-detail-scores">${y24Rows(e).map(r=>`<div><b>${esc(r.subject)}</b><strong>${r.score==null?'—':r.score+'점'}</strong><span>${r.grade?r.grade+'등급':'등급 미입력'}${r.minutes!=null?' · '+r.minutes+'분':''}</span></div>`).join('')}</div>${t.memo?`<p class="y24-note">${esc(t.memo)}</p>`:''}${e.archive?`<div class="archive-q-list">${(t.questions||[]).map((q,i)=>`${y230ArchiveQuestionRow(t,q)}${y220HasQuestionNumber(q)?`<button class="btn ghost small" data-y24-reactivate="${esc(i)}">이 문항 다시 점검</button>`:''}`).join('')}</div>`:''}`;
  $('#y24ExamActions').innerHTML=`<button id="y24DeleteExam" class="btn danger">삭제</button>${e.archive?'<button id="y24ArchiveEdit" class="btn ghost">성적 수정</button>':'<button id="y24EditExam" class="btn ghost">수정</button><button id="y24ReviewExam" class="btn primary">문항 분석</button>'}`;
- $('#y24DeleteExam').onclick=()=>{if(!confirm('이 시험을 휴지통으로 이동할까요?'))return;if(y24Commit(()=>{if(e.archive){trashPush('analysisArchiveTest',{test:deep(t)});DB.analysisArchive=DB.analysisArchive.filter(a=>a.archiveId!==t.archiveId);y230RebuildArchiveDerived();}else{trashPush('test',t);DB.tests=DB.tests.filter(a=>a.id!==t.id);}})){hideModal('y24ExamDetailModal');renderTests();}};
+ $('#y24DeleteExam').onclick=()=>{if(!confirm('이 시험을 휴지통으로 이동할까요?'))return;if(y24Commit(()=>{if(e.archive){const reviews=detachArchiveReviews(t.archiveId);trashPush('analysisArchiveTest',{test:deep(t),reviews});DB.analysisArchive=DB.analysisArchive.filter(a=>a.archiveId!==t.archiveId);y230RebuildArchiveDerived();}else{trashPush('test',t);DB.tests=DB.tests.filter(a=>a.id!==t.id);}})){hideModal('y24ExamDetailModal');renderTests();}};
  if(!e.archive){$('#y24EditExam').onclick=()=>{hideModal('y24ExamDetailModal');y24OpenTestEditor(t);};$('#y24ReviewExam').onclick=()=>{hideModal('y24ExamDetailModal');openTestReviewModal(t.id);};}
  else {$('#y24ArchiveEdit').onclick=()=>{hideModal('y24ExamDetailModal');y24OpenTestEditor(t,true);};$$('.y230-q-del').forEach(b=>b.onclick=()=>{y230DeleteArchiveQuestion(b.dataset.archiveId,b.dataset.qkey);y24OpenExam(key);});$$('[data-y24-reactivate]').forEach(b=>b.onclick=()=>y24Reactivate(t,Number(b.dataset.y24Reactivate)));}
  showModal('y24ExamDetailModal');
@@ -201,17 +204,17 @@ function y24LinePath(rows,value,x,y){let path='',last=null;rows.forEach((r,i)=>{
 function y24Timeline(r){return r.date.known?r.date.label.slice(5):y230TimelineLabel({__historical:true,historyLabel:r.test.examLabel||r.test.name,sortKey:r.date.key});}
 renderRawScoreChart=function(subject,rows){
  const svg=$('#rawScoreChart'),max=subjectScoreLimit(subject);$('#scoreRangeLabel').textContent=`${max}점 / 1–9등급`;
- const W=760,H=280,L=48,R=48,T=30,B=45,iw=W-L-R,ih=H-T-B,x=i=>rows.length===1?L+iw/2:L+iw*i/Math.max(1,rows.length-1),ys=v=>T+ih*(1-v/max),yg=v=>T+ih*(v-1)/8;
+ const W=760,H=300,L=48,R=48,T=30,B=65,iw=W-L-R,ih=H-T-B,x=i=>rows.length===1?L+iw/2:L+iw*i/Math.max(1,rows.length-1),ys=v=>T+ih*(1-v/max),yg=v=>T+ih*(v-1)/8;
  svg.setAttribute('viewBox',`0 0 ${W} ${H}`);const every=Math.max(1,Math.ceil(rows.length/6));
  const scorePath=y24LinePath(rows,r=>r.score,x,ys),gradePath=y24LinePath(rows,r=>r.grade>=1&&r.grade<=9?r.grade:null,x,yg);
- svg.innerHTML=`<text class="chart-axis-label" x="${L}" y="14">점수</text><text class="chart-axis-label" x="${W-R}" y="14" text-anchor="end">등급</text>${[0,max/2,max].map(v=>`<line class="chart-grid-line" x1="${L}" x2="${W-R}" y1="${ys(v)}" y2="${ys(v)}"/><text class="chart-axis-label" x="${L-10}" y="${ys(v)+4}" text-anchor="end">${v}</text>`).join('')}${[1,3,5,7,9].map(v=>`<text class="chart-axis-label" x="${W-R+12}" y="${yg(v)+4}">${v}</text>`).join('')}<path class="score-path" d="${scorePath}"/><path class="y24-grade-path" d="${gradePath}"/>${rows.map((r,i)=>{const text=`${y24ExamTitle(r.test)} · ${r.score==null?'점수 미입력':r.score+'점'} · ${r.grade?r.grade+'등급':'등급 미입력'}`;return`<g class="y24-chart-point" data-chart-i="${i}" role="button" tabindex="0" aria-label="${esc(text)}"><title>${esc(text)}</title><rect class="y24-chart-hit" x="${x(i)-12}" y="${T-5}" width="24" height="${ih+10}"/>${r.score==null?'':`<circle class="y24-score-dot" cx="${x(i)}" cy="${ys(r.score)}" r="5"/>`}${!r.grade?'':`<rect class="y24-grade-dot grade-${r.grade}" x="${x(i)-4}" y="${yg(r.grade)-4}" width="8" height="8" rx="2"/>`}${i%every===0||i===rows.length-1?`<text class="chart-axis-label" x="${x(i)}" y="${H-16}" text-anchor="middle">${esc(y24Timeline(r))}</text>`:''}</g>`;}).join('')}`;
+ svg.innerHTML=`<text class="chart-axis-label" x="${L}" y="14">점수</text><text class="chart-axis-label" x="${W-R}" y="14" text-anchor="end">등급</text>${[0,max/2,max].map(v=>`<line class="chart-grid-line" x1="${L}" x2="${W-R}" y1="${ys(v)}" y2="${ys(v)}"/><text class="chart-axis-label" x="${L-10}" y="${ys(v)+4}" text-anchor="end">${v}</text>`).join('')}${[1,3,5,7,9].map(v=>`<text class="chart-axis-label" x="${W-R+12}" y="${yg(v)+4}">${v}</text>`).join('')}<path class="score-path" d="${scorePath}"/><path class="y24-grade-path" d="${gradePath}"/>${rows.map((r,i)=>{const text=`${y24ExamTitle(r.test)} · ${r.score==null?'점수 미입력':r.score+'점'} · ${r.grade?r.grade+'등급':'등급 미입력'}`;return`<g class="y24-chart-point" data-chart-i="${esc(i)}" role="button" tabindex="0" aria-label="${esc(text)}"><title>${esc(text)}</title><rect class="y24-chart-hit" x="${x(i)-16}" y="${T-5}" width="32" height="${ih+10}"/>${r.score==null?'':`<circle class="y24-score-dot" cx="${x(i)}" cy="${ys(r.score)}" r="5"/>`}${!r.grade?'':`<rect class="y24-grade-dot grade-${r.grade}" x="${x(i)-4}" y="${yg(r.grade)-4}" width="8" height="8" rx="2"/>`}${i%every===0||i===rows.length-1?`<text class="chart-axis-label" x="${x(i)}" y="${H-16}" text-anchor="middle">${esc(y24Timeline(r))}</text>`:''}</g>`;}).join('')}`;
  const select=i=>{const r=rows[i];if(!r)return;$('#y24ChartSelection').textContent=`${y24ExamTitle(r.test)} · ${r.date.known?r.date.label:y24Timeline(r)+' · 응시일 미입력'} · ${r.score==null?'점수 미입력':r.score+'점'} · ${r.grade?r.grade+'등급':'등급 미입력'}`;};
- $$('.y24-chart-point').forEach(g=>{g.onclick=()=>select(Number(g.dataset.chartI));g.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();select(Number(g.dataset.chartI));}};});select(rows.length-1);
+ $$('.y24-chart-point').forEach(g=>{g.onclick=()=>select(Number(g.dataset.chartI));g.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();select(Number(g.dataset.chartI));}};});select(rows.length-1);if(typeof renderScoreSegmentLabels==='function')renderScoreSegmentLabels(rows);
 };
 renderGradeTrend=function(){$('#gradeTrend').innerHTML='';};
 renderScoreAnalysis=function(){
  const f=analysisFilterState(),empty=$('#scoreAnalysisEmpty'),content=$('#scoreAnalysisContent');$('#scoreAnalysisCaption').hidden=true;
- if(f.subject==='all'){content.classList.add('hidden');empty.classList.remove('hidden');$('#scoreAnalysisTitle').textContent='전과목 성적';empty.innerHTML=`<div class="analysis-overview-list">${SUBJECTS.map(s=>{const r=y24ChartRows(s,f).at(-1);return`<button class="analysis-overview-row" data-y24-sub="${s}"><b>${s}</b><strong>${r?.score==null?'—':r.score+'점'}</strong><span>${r?.grade?r.grade+'등급':''}</span></button>`;}).join('')}</div>`;$$('[data-y24-sub]').forEach(b=>b.onclick=()=>{$('#analysisSubjectFilter').value=b.dataset.y24Sub;renderTests();});return;}
+ if(f.subject==='all'){content.classList.add('hidden');empty.classList.remove('hidden');$('#scoreAnalysisTitle').textContent='전과목 성적';empty.innerHTML=`<div class="analysis-overview-list">${SUBJECTS.map(s=>{const r=y24ChartRows(s,f).at(-1);return`<button class="analysis-overview-row" data-y24-sub="${esc(s)}"><b>${s}</b><strong>${r?.score==null?'—':r.score+'점'}</strong><span>${r?.grade?r.grade+'등급':''}</span></button>`;}).join('')}</div>`;$$('[data-y24-sub]').forEach(b=>b.onclick=()=>{$('#analysisSubjectFilter').value=b.dataset.y24Sub;renderTests();});return;}
  const rows=y24ChartRows(f.subject,f);$('#scoreAnalysisTitle').textContent=`${f.subject} 성적 흐름`;
  content.classList.toggle('hidden',!rows.length);empty.classList.toggle('hidden',!!rows.length);if(!rows.length){empty.textContent='기록 없음';return;}
  renderRawScoreChart(f.subject,rows);renderGradeTrend(rows);y24RenderScoreInsight(f.subject,rows,f);renderQuestionPattern(f.subject,f);renderReviewQueues(f.subject);
@@ -233,7 +236,7 @@ const y24NormalizeBase=__impl_normalizeTestRecord;
 __impl_normalizeTestRecord=function(t){const out=y24NormalizeBase(t);if(t?.scope==='unknown')out.scope='unknown';return out;};
 function y24FieldRow(subject,row={}){
  const fields=[['score','원점수',row.score],['grade','등급',row.grade],['wrong','오답 수',row.wrong],['minutes','소요시간(분)',row.minutes],['wrongQuestions','틀린 문항 번호',row.wrongQuestions],['uncertainQuestions','애매하지만 맞은 번호',row.uncertainQuestions],['abandoned','시간 없어 못 푼 번호',row.abandoned]];
- return `<section class="y24-subject-fields" data-subject="${esc(subject)}"><h4>${esc(subject)}</h4><div class="grid g3">${fields.map(([k,label,v])=>`<label>${label}<input class="input" data-exam-field="${k}" ${['score','grade','wrong','minutes'].includes(k)?`type="number" min="${k==='grade'?1:0}" ${k==='grade'?'max="9"':''}`:'type="text"'} value="${esc(v??'')}"></label>`).join('')}</div></section>`;
+ return `<section class="y24-subject-fields" data-subject="${esc(subject)}"><h4>${esc(subject)}</h4><div class="grid g3">${fields.map(([k,label,v])=>`<label>${label}<input class="input" data-exam-field="${esc(k)}" ${['score','grade','wrong','minutes'].includes(k)?`type="number" min="${k==='grade'?1:0}" ${k==='grade'?'max="9"':''}`:'type="text"'} value="${esc(v??'')}"></label>`).join('')}</div></section>`;
 }
 function y24EditorRows(t,archive=false){
  if(!t)return {};
@@ -255,9 +258,14 @@ __impl_openTestModal=function(){y24OpenTestEditor();};
 function y24ValidateExamRows(rows){
  for(const [subject,r] of Object.entries(rows)){
   for(const key of ['score','grade','wrong','minutes']){const n=y24Num(r[key]);if(n!=null&&(n<0||(key==='score'&&n>subjectScoreLimit(subject))||(key==='grade'&&(!Number.isInteger(n)||n<1||n>9))||(key==='wrong'&&(!Number.isInteger(n)||n>QUESTION_LIMITS[subject]))))return `${subject} ${key==='score'?'원점수':key==='grade'?'등급':key==='wrong'?'오답 수':'시간'}를 확인하세요.`;}
-  for(const key of ['wrongQuestions','uncertainQuestions','abandoned'])if(parseQuestionNumbers(r[key]||'').some(n=>n<1||n>QUESTION_LIMITS[subject]))return `${subject} 문항 번호를 확인하세요.`;
+  for(const key of ['wrongQuestions','uncertainQuestions','abandoned'])if(!validQuestionInput(r[key],QUESTION_LIMITS[subject]))return subject+' 문항 번호를 확인하세요. 1~'+QUESTION_LIMITS[subject]+'의 정수를 쉼표나 공백으로 구분하세요.';
  }
  return '';
+}
+function validQuestionInput(value,limit){
+ if(value==null||String(value).trim()==='')return true;
+ const tokens=Array.isArray(value)?value:String(value).trim().split(/[\s,\/、]+/);
+ return tokens.every(v=>/^\d+$/.test(String(v))&&Number(v)>=1&&Number(v)<=limit);
 }
 __impl_saveTestModal=function(){
  const state=y24State.editor;if(!state)return;const old=state.original,name=$('#testName').value.trim(),date=$('#testDate').value,source=$('#testSource').value,rows=y24ReadEditorRows(),error=y24ValidateExamRows(rows);
@@ -286,8 +294,8 @@ trashTitle=function(x){return x.type==='questionV24'?`${x.data.testName} · ${x.
 const y24SubjectHistory=subjectHistory;
 subjectHistory=function(subject,f={}){return y24SubjectHistory(subject,f).filter(r=>!r.test.archiveReviewOnly);};
 const y24SettingsBase=__impl_renderSettings;
-__impl_renderSettings=function(){y24SettingsBase();$('#versionInfo').innerHTML=`<code>曆象 ${Y24_VERSION}<br>Data schema ${SCHEMA_VERSION}</code>`;};
-__impl_renderVersionStatus=function(){$('#runtimeStatus').textContent='2.4 · SW 2.4';};
+__impl_renderSettings=function(){y24SettingsBase();if(typeof renderStorageManagement==='function')renderStorageManagement();$('#versionInfo').innerHTML=`<code>曆象 ${Y24_VERSION}<br>Data schema ${SCHEMA_VERSION}</code>`;};
+__impl_renderVersionStatus=function(){const el=$('#runtimeStatus');if(el)el.textContent=APP_VERSION+(globalThis.YEOKSANG_WRITER===false?' · 읽기 전용':globalThis.YEOKSANG_SW_VERSION?' · 오프라인 '+globalThis.YEOKSANG_SW_VERSION:' · 온라인');};
 document.addEventListener('DOMContentLoaded',()=>{
  $('#y24EmptyTrash').onclick=()=>y24PurgeTrash();$('#y24TestSearch').oninput=y24RenderExamList;$('#testSubject').onchange=y24RenderEditorFields;
  $('#y24SaveActual').onclick=y24SaveActual;$('#y24AsPlanned').onclick=y24AsPlanned;$('#y24AddExtra').onclick=y24AddExtra;
@@ -301,11 +309,11 @@ function y24SetExamTab(tab){y24ExamTab=tab;for(const [name,id] of [['records','y
 const y24TestsFinal=__impl_renderTests;
 __impl_renderTests=function(){y24TestsFinal();y24SetExamTab(y24ExamTab);$$('[data-y24-tab]').forEach(b=>b.onclick=()=>y24SetExamTab(b.dataset.y24Tab));if($('#y24RetryCount'))$('#y24RetryCount').textContent=`재풀이 대기 ${reviewEntries({subject:analysisFilterState().subject}).length}문항`;$$('.analysis-subject-jump').forEach(b=>b.onclick=()=>{$('#analysisSubjectFilter').value=b.dataset.subject;y24ExamTab='charts';renderTests();});};
 renderTestSubjectBoard=function(){
- $('#testSubjectBoard').innerHTML=SUBJECTS.map(s=>{const rows=y24ChartRows(s,{source:'all',scope:'representative'}),r=rows.at(-1),pending=reviewEntries({subject:s}).length;return `<button type="button" class="test-subject-card ${subjectClass(s)} analysis-subject-jump" data-subject="${s}"><b>${s}</b><strong>${r?.score!=null?r.score+'점':r?.grade?r.grade+'등급':'—'}</strong><span>${r?esc(r.date.known?r.date.label:y24Timeline(r)):''}</span><small>${[r?.grade?r.grade+'등급':'',pending?'재풀이 '+pending:''].filter(Boolean).join(' · ')}</small></button>`;}).join('');
+ $('#testSubjectBoard').innerHTML=SUBJECTS.map(s=>{const rows=y24ChartRows(s,{source:'all',scope:'representative'}),r=rows.at(-1),pending=reviewEntries({subject:s}).length;return `<button type="button" class="test-subject-card ${subjectClass(s)} analysis-subject-jump" data-subject="${esc(s)}"><b>${s}</b><strong>${r?.score!=null?r.score+'점':r?.grade?r.grade+'등급':'—'}</strong><span>${r?esc(r.date.known?r.date.label:y24Timeline(r)):''}</span><small>${[r?.grade?r.grade+'등급':'',pending?'재풀이 '+pending:''].filter(Boolean).join(' · ')}</small></button>`;}).join('');
 };
 subjectHistory=function(subject,f={}){return y24SubjectHistory(subject,{...f,source:'all'}).filter(r=>!r.test.archiveReviewOnly&&(!f.source||f.source==='all'||y24Source(r.test)===f.source));};
 // Preserve missing scores when importing final historical packages, including a real zero.
 const y24HistoricalImport=y220HistoricalImport;
 y220HistoricalImport=function(pkg){const ids=new Set((DB.analysisArchive||[]).map(a=>a.archiveId));y24HistoricalImport(pkg);for(const t of pkg.tests||[]){const a=(DB.analysisArchive||[]).find(a=>a.archiveId===`${pkg.packageId}:${t.id||t.examLabel}`);if(a&&!ids.has(a.archiveId))Object.assign(a,{score:y24Num(t.score),grade:y24Num(t.grade),source:t.source||'',scope:t.scope||'full',solvedDate:t.solvedDate||'',minutes:y24Num(t.minutes)});}};
 const y24NavigateBase=__impl_navigate;
-__impl_navigate=function(page){y24NavigateBase(page);if(typeof globalThis.scrollTo==='function')globalThis.scrollTo(0,0);};
+__impl_navigate=function(page){const old=document.querySelector('.page.active')?.id;if(old)pagePositions.set(old,globalThis.scrollY||0);y24NavigateBase(page);if(typeof globalThis.scrollTo==='function')globalThis.scrollTo(0,pagePositions.get(page)||0);};
