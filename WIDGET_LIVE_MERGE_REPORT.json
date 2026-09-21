@@ -1,0 +1,35 @@
+{
+  "base": "YEOKSANG_v2_5_1_GITHUB_FLAT.zip",
+  "changed": [
+    "index.html",
+    "sw-v200.js"
+  ],
+  "added": [
+    "WIDGET_LIVE_PATCH.md",
+    "app-widget-live.js"
+  ],
+  "unchanged": [
+    "ANALYSIS_PACKAGE_SPEC.md",
+    "QA_V250.md",
+    "README.md",
+    "app-v200-core.js",
+    "app-v200-engine.js",
+    "app-v200-recovery.js",
+    "app-v210.js",
+    "app-v220-analysis.js",
+    "app-v230.js",
+    "app-v231.js",
+    "app-v240.js",
+    "baseline-v200.js",
+    "boot-v220.js",
+    "icon-192.png",
+    "icon-512.png",
+    "manifest-v200.webmanifest",
+    "record-safety.js",
+    "recovery.html",
+    "styles-v200.css",
+    "styles-v210.css",
+    "styles-v240.css",
+    "view-tools.js"
+  ]
+}
