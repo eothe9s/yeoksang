@@ -1,9 +1,9 @@
 /* 曆象 v2 · 수능 만점 운영체제 */
 'use strict';
 
-const APP_VERSION='2.5.1';
+const APP_VERSION='2.5.2';
 const SCHEMA_VERSION=14;
-const BUILD='2026-09-20-v2.5.1';
+const BUILD='20260923-evidence-1';
 const EXAM9='2026-09-02';
 const CSAT='2026-11-19';
 const SUBJECTS=['국어','수학','영어','사회문화','경제'];

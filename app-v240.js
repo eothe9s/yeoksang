@@ -1,6 +1,6 @@
 /* 曆象 v2.4 — compact views and explicit, preserved daily work records. */
 'use strict';
-const Y24_VERSION='2.5';
+const Y24_VERSION='2.5.2';
 const Y24_SOURCES=['평가원 모의평가','교육청 학력평가','수능','사설 모의고사'];
 const y24Num=v=>v==null||String(v).trim()===''?null:(Number.isFinite(Number(v))?Number(v):null);
 const y24Fmt=n=>n==null?'—':String(Math.round(n*10)/10);
@@ -315,6 +315,7 @@ __impl_saveTestModal=function(){
   nextQuestions.push(...questionRecordsFromTexts(subject,wrong,r.uncertainQuestions,date,keep));
  }
  common.questionRecords=nextQuestions;
+ common.questionCoverage={...(old?.questionCoverage||{}),...Object.fromEntries(Object.entries(rows).map(([s,r])=>[s,y252CoverageInput(r)]))};
  if(full){for(const [key,field] of Object.entries({scores:'score',grades:'grade',wrongs:'wrong',minutes:'minutes',wrongQuestionMap:'wrongQuestions',uncertainQuestionMap:'uncertainQuestions',abandonedQuestionMap:'abandoned'}))common[key]=Object.fromEntries(Object.entries(rows).map(([s,r])=>[s,['score','grade','wrong','minutes'].includes(field)?y24Num(r[field]):r[field]||'']));common.scoreMissingMap=Object.fromEntries(Object.entries(rows).map(([s,r])=>[s,y24Num(r.score)==null]));}
  else{const r=rows[selected];Object.assign(common,{subject:selected,score:y24Num(r.score),scoreMissing:y24Num(r.score)==null,grade:y24Num(r.grade),wrongCount:y24Num(r.wrong),minutes:y24Num(r.minutes),wrongQuestions:r.wrongQuestions||'',uncertainQuestions:r.uncertainQuestions||'',abandonedQuestions:r.abandoned||''});}
  const record=normalizeTestRecord(common);

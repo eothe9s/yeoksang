@@ -367,9 +367,6 @@ globalThis.YEOKSANG_WIDGET_SYNC={
 };
 
 
-function ywRefreshServiceWorker(){
-  if(!('serviceWorker' in navigator))return;
-  navigator.serviceWorker.register('./sw-v200.js?v=251-live-1').then(reg=>reg.update().catch(()=>{})).catch(()=>{});
-}
-document.addEventListener('DOMContentLoaded',()=>{ywInitUI();ywRefreshServiceWorker();},{once:true});
+// Service worker lifecycle is owned by the app. Widget sync never re-registers it.
+document.addEventListener('DOMContentLoaded',()=>{ywInitUI();},{once:true});
 })();

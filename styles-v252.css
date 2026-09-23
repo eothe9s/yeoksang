@@ -1,0 +1,8 @@
+/* Local controls only; preserve the existing layout and palette elsewhere. */
+.y252-pattern-tools{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;margin:8px 0}
+.y252-toggle{display:inline-flex;gap:3px;border:1px solid var(--line);border-radius:8px;padding:2px;background:#fff}
+.y252-toggle button{appearance:none;border:0;border-radius:6px;padding:6px 9px;min-height:30px;font:inherit;color:#596678;background:transparent;cursor:pointer}
+.y252-toggle button[aria-pressed="true"]{background:#edf2f9;color:#304a70;font-weight:700}
+.y252-toggle button:focus-visible,.question-cell:focus-visible{outline:2px solid #5d789f;outline-offset:2px}
+#questionNumberGrid .question-cell small{font-size:10px}
+#questionHeatLegend{min-width:0;font-size:11px;line-height:1.4;color:#566273}
