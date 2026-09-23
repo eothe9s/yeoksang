@@ -224,6 +224,40 @@ function y24RenderScoreInsight(subject,rows,f){
  const times=rows.filter(r=>r.date.known&&r.minutes>0),time=times.at(-1),checks=y21Checks(subject);
  $('#scoreInsight').innerHTML=`<div class="analysis-insight"><span>${latest?.date.known?'최근 원점수':'회차별 마지막 원점수'}</span><b>${latest?latest.score+'점':'—'}${latest&&previous?` · ${latest.score-previous.score>0?'+':''}${latest.score-previous.score}점`:''}</b></div><div class="analysis-insight"><span>최근 소요시간</span><b>${time?time.minutes+'분':'—'}</b></div><div class="analysis-insight"><span>현재 미해결</span><b>${checks.pending.length}문항${checks.recurring.length?' · 재발 '+checks.recurring.length:''}</b></div>`;
 }
+// Historical frequency is independent of the current review queue. Read-only projection.
+questionPattern=function(subject,filters={}){
+ const source=filters.source||'all',scope=filters.scope||'representative';
+ let rows=y24Exams().filter(e=>source==='all'||y24Source(e.record)===source).flatMap(y24Rows).filter(r=>r.subject===subject);
+ const scopeOf=r=>r.test.scope||(r.archive?'full':'unknown');
+ if(scope==='representative'){
+  const full=rows.filter(r=>scopeOf(r)==='full');
+  if(full.length)rows=full;else{const nonUnit=rows.filter(r=>scopeOf(r)!=='unit');if(nonUnit.length)rows=nonUnit;}
+ }else if(scope!=='all')rows=rows.filter(r=>scopeOf(r)===scope);
+ rows.sort((a,b)=>Number(a.date.known)-Number(b.date.known)||a.date.key.localeCompare(b.date.key)||a.examKey.localeCompare(b.examKey));
+ const tests=new Map(),stats=new Map();
+ rows.forEach(r=>{
+  const t=r.test,test={...t,id:r.archive?r.examKey:t.id,date:r.date.known?r.date.key:'',
+   _patternExamKey:r.examKey,_patternOrder:`${r.date.known?'1':'0'}:${r.date.key}:${r.examKey}`,
+   _patternLabel:`${r.date.known?r.date.label:(t.attemptPeriod?.label||t.round||'응시일 미입력')} · ${y24ExamTitle(t)}`};
+  tests.set(test.id,test);
+  const seen=new Set();
+  (r.questions||[]).forEach(raw=>{
+   const number=Number(raw.number);
+   if(!Number.isInteger(number)||number<1||number>QUESTION_LIMITS[subject]||!['wrong','uncertain'].includes(raw.status))return;
+   const key=number+':'+raw.status;if(seen.has(key))return;seen.add(key);
+   const question={...raw,number,subject};
+   // An archive is historical evidence, never a new pending review task.
+   if(r.archive){
+    const review=(DB.tests||[]).filter(t=>t.archiveReviewOnly&&t.archiveRef===r.test.archiveId).flatMap(t=>t.questionRecords||[]).find(q=>Number(q.number)===number&&(!q.subject||q.subject===subject));
+    question.retryState=review?.retryState||'resolved';
+   }
+   const stat=stats.get(number)||{number,wrongTestIds:new Set(),uncertainTestIds:new Set(),entries:[]};
+   (question.status==='wrong'?stat.wrongTestIds:stat.uncertainTestIds).add(test.id);
+   stat.entries.push({test,question});stats.set(number,stat);
+  });
+ });
+ return{rows,tests:[...tests.values()],attempts:tests.size,stats};
+};
 const y24PatternBase=renderQuestionPattern;
 renderQuestionPattern=function(subject,f){y24PatternBase(subject,f);const p=questionPattern(subject,f);$('#questionHeatLegend').textContent='';if(p.attempts<3){$('#questionNumberGrid').innerHTML='<span class="y24-empty-inline">기록 부족</span>';$('#questionInsight').innerHTML='';}else{$$('#questionInsight .question-focus>span').forEach(el=>el.remove());}};
 __impl_renderProtocolBoard=function(){const rows=SUBJECTS.map(s=>({s,rules:DB.subjectProtocols?.[s]||[]})).filter(x=>x.rules.length);$('#protocolBoard').innerHTML=rows.map(({s,rules})=>`<div class="protocol-row"><b>${s}</b><ol>${rules.map(r=>`<li>${esc(r)}</li>`).join('')}</ol></div>`).join('')||'<span class="y24-empty-inline">—</span>';};
