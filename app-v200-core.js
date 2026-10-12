@@ -1,9 +1,9 @@
 /* 曆象 v2 · 수능 만점 운영체제 */
 'use strict';
 
-const APP_VERSION='2.5.2';
+const APP_VERSION='2.6.0';
 const SCHEMA_VERSION=14;
-const BUILD='20260923-evidence-1';
+const BUILD='20261012-records-schedule-1';
 const EXAM9='2026-09-02';
 const CSAT='2026-11-19';
 const SUBJECTS=['국어','수학','영어','사회문화','경제'];
@@ -268,9 +268,9 @@ function safeSetItem(key,value,{silent=false}={}){
  if(globalThis.YEOKSANG_STARTING)return false;
  try{
   if(key===DB_KEY){
-   if(globalThis.YEOKSANG_WRITER===false||localStorage.getItem(DB_KEY)!==LAST_PERSISTED_RAW){const e=new Error('다른 탭의 기록을 덮어쓰지 않습니다. 다른 탭을 닫고 원본·미저장본을 내보낸 뒤 다시 병합하세요.');e.name='StorageConflictError';throw e}
+   if(globalThis.YEOKSANG_WRITER===false||(globalThis.YEOKSANG_RECORD_STORE?YEOKSANG_RECORD_STORE.read():localStorage.getItem(DB_KEY))!==LAST_PERSISTED_RAW){const e=new Error('다른 탭의 기록을 덮어쓰지 않습니다. 다른 탭을 닫고 원본·미저장본을 내보낸 뒤 다시 병합하세요.');e.name='StorageConflictError';throw e}
   }
-  localStorage.setItem(key,value);
+  if(key===DB_KEY&&globalThis.YEOKSANG_RECORD_STORE)YEOKSANG_RECORD_STORE.save(value);else localStorage.setItem(key,value);
   if(key===DB_KEY)LAST_PERSISTED_RAW=value;
   return true;
  }catch(e){
@@ -307,7 +307,7 @@ function migrateDB(raw){
 }
 function loadDB(){
  let raw=null,stored=null;
- try{stored=localStorage.getItem(DB_KEY);if(stored!==null){raw=JSON.parse(stored);if(!raw||typeof raw!=='object'||Array.isArray(raw))throw new Error('invalid saved data')}}catch(e){
+ try{stored=globalThis.YEOKSANG_RECORD_STORE?YEOKSANG_RECORD_STORE.read():localStorage.getItem(DB_KEY);if(stored!==null){raw=JSON.parse(stored);if(!raw||typeof raw!=='object'||Array.isArray(raw))throw new Error('invalid saved data')}}catch(e){
   document.addEventListener('DOMContentLoaded',()=>{globalThis.y211ShowRecovery?.('기존 저장값을 읽지 못했습니다. 초기화하지 않고 중단했습니다.');});
   throw new Error('Saved data unreadable; initialization stopped without overwriting.');
  }
@@ -996,7 +996,7 @@ function saveBlockModal__impl1(){
  const proposed=normalizeBlock(old?deep(old):{id:uid(),fixed:false},date);proposed.name=$('#blockName').value.trim()||'시간 블록';proposed.type=$('#blockType').value;proposed.start=$('#blockStart').value;proposed.end=$('#blockEnd').value;proposed.selfStudy=$('#blockSelfStudy').checked;proposed.device=proposed.selfStudy&&$('#blockDevice').checked;proposed.locked=$('#blockLocked').checked;proposed.actualMin=$('#blockActual').value===''?null:Number($('#blockActual').value);
  if(proposed.start&&proposed.end&&invalidBlockTime(proposed)){alert('시작·종료 시각을 확인하세요. 같은 시각이거나 12시간을 넘는 블록은 저장할 수 없습니다.');return}
  const overlaps=blocks.filter(x=>x.id!==proposed.id&&blocksOverlap(proposed,x));if(overlaps.length&&!confirm(`기존 블록 ${overlaps.map(x=>x.name).join(', ')}과 시간이 겹칩니다. 그래도 저장할까요?`))return;
- if(old){Object.assign(old,proposed);if(old.fixed)old.userOverrides={name:old.name,type:old.type,selfStudy:old.selfStudy,device:old.device,start:old.start,end:old.end}}else blocks.push(proposed);
+ if(old){Object.assign(old,proposed);if(old.fixed)old.userOverrides={name:old.name,type:old.type,selfStudy:old.selfStudy,device:old.device,start:old.start,end:old.end,locked:old.locked}}else blocks.push(proposed);
  saveSchedule(date,blocks);hideModal('blockModal');renderPlanner();if(date===viewDate)renderDashboard()
 }
 function deleteBlockModal(){
@@ -1037,7 +1037,7 @@ function renderLectureCatalog(){
    buttons.push(`<button class="lecture-btn ${isDone?'done':''} ${inCart?'cart':''}" data-ref="${esc(ref)}"><b>${String(n).padStart(2,'0')}강</b><small>${isDone?'완료':inCart?'장바구니':'미수강'}</small></button>`)
   }
   return `<section class="source-card vending-source" data-search="${esc(`${c.subject} ${c.provider} ${c.display}`.toLowerCase())}">
-    <div class="source-head"><div><h4>${esc(c.subject)} · ${esc(c.provider)} ${esc(c.display)}</h4><span>${done}/${c.total}강 완료</span></div><div class="row"><button class="btn ghost small add-next" data-key="${esc(c.key)}" data-count="2">다음 2강</button>${c.custom?`<button class="btn danger small del-course" data-key="${esc(c.key)}">삭제</button>`:''}</div></div>
+    <div class="source-head"><div><h4>${esc(c.subject)} · ${esc(c.provider)} ${esc(c.display)}</h4><span>${done}/${c.total}강 완료</span></div><div class="row">${c.custom?`<button class="btn danger small del-course" data-key="${esc(c.key)}">삭제</button>`:''}</div></div>
     <div class="lecture-grid">${buttons.join('')||'<div class="muted">표시할 강의가 없습니다.</div>'}</div>
   </section>`
  }).join('');
@@ -1471,7 +1471,7 @@ function runDiagnostics__impl1(){
  (DB.automationConflicts||[]).forEach(c=>{if(!DB.automations.some(r=>r.id===c.ruleId))problems.push(`삭제된 자동화의 충돌 정보: ${c.id}`);if(c.date>todayDate())problems.push(`미래 날짜 자동화 충돌: ${c.date}`);if(c.sourceSnapshot&&DB.automations.find(r=>r.id===c.ruleId)?.source!==c.sourceSnapshot)problems.push(`수정 전 규칙의 충돌 정보: ${c.date}`)});
  Object.entries(DB.condition||{}).forEach(([date,c])=>{const prev=addDays(date,-1),pmPrev=readPlanMeta(prev),pmDay=readPlanMeta(date);if(c.bed&&pmPrev.bed&&c.bed!==pmPrev.bed)problems.push(`취침 동기화 불일치: ${date}`);if(c.wake&&pmDay.wake&&c.wake!==pmDay.wake)problems.push(`기상 동기화 불일치: ${date}`)});
  (DB.scheduleTemplates||[]).forEach(t=>{if(!t.id||!t.name||!Array.isArray(t.blocks))problems.push('저장 시간표 구조 오류');(t.blocks||[]).forEach(b=>{if(b.start&&b.end&&invalidBlockTime(b))problems.push(`저장 시간표 시간 오류: ${t.name} · ${b.name}`)})});Object.entries(DB.scheduleModes||{}).forEach(([d,m])=>{if(m?.mode==='template'&&!scheduleTemplateById(m.templateId))problems.push(`삭제된 저장 시간표 참조: ${d}`)});Object.entries(DB.scheduleHidden||{}).forEach(([d,a])=>{if(!Array.isArray(a))problems.push(`삭제 블록 기록 오류: ${d}`)});
- if(DB.schema!==SCHEMA_VERSION)problems.push(`데이터 스키마 불일치: ${DB.schema}`);const mb=approximateStorageBytes()/1024/1024;if(mb>4)problems.push(`저장 용량 주의: 약 ${mb.toFixed(1)} MB`);
+ if(DB.schema!==SCHEMA_VERSION)problems.push(`데이터 스키마 불일치: ${DB.schema}`);const mb=approximateStorageBytes()/1024/1024;if(!globalThis.YEOKSANG_RECORD_STORE&&mb>4)problems.push(`저장 용량 주의: 약 ${mb.toFixed(1)} MB`);
  $('#diagnosticResult').innerHTML=problems.length?`<b>${problems.length}개 확인 필요</b><ul class="diagnostic-list">${problems.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`:`<b>정상</b><br>연결 · 중복 · 시간 · 자동화 · 수면 동기화 · 저장 용량 검사 이상 없음`
 }
 function renderTrash(){

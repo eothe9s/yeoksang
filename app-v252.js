@@ -1,6 +1,6 @@
 /* 曆象 2.5.2 — read-only evidence views and atomic exam lifecycle. */
 'use strict';
-const Y252_BUILD='20260923-evidence-1';
+const Y252_BUILD='20261012-records-schedule-1';
 let y252PatternWindow='all';
 
 function y252AnalysisRows(subject,f={}){

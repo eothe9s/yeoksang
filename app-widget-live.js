@@ -112,6 +112,11 @@ function ywPlan(date,tasks,timeline){
 }
 
 function ywBuildSnapshot(date=ywDate(),reason='save'){
+  const original=DB,raw=globalThis.YEOKSANG_RECORD_STORE?.durable();
+  if(!raw)return ywBuildSnapshotFromScreen(date,reason);
+  try{DB=JSON.parse(raw);return ywBuildSnapshotFromScreen(date,reason);}finally{DB=original;}
+}
+function ywBuildSnapshotFromScreen(date,reason){
   const sourceTasks=Array.isArray(DB?.tasks?.[date])?DB.tasks[date]:[];
   const tasks=sourceTasks.map(ywMinimalTask);
   const timeline=ywTimeline(date,tasks);
@@ -329,14 +334,7 @@ function ywInitUI(){
 }
 
 // 기존 저장 래퍼 체인을 보존하고, saveDB가 true일 때만 snapshot을 큐에 넣는다.
-if(typeof __impl_saveDB==='function'){
-  const ywSaveBase=__impl_saveDB;
-  __impl_saveDB=function(...args){
-    const ok=ywSaveBase.apply(this,args);
-    if(ok&&!globalThis.YEOKSANG_STARTING)ywQueueAndSchedule('save',180);
-    return ok;
-  };
-}
+// Widget updates are queued by app-v260 only after durable commit.
 
 // 페이지를 닫거나 백그라운드로 보내기 직전 최신 pending을 keepalive fetch로 밀어본다.
 window.addEventListener('online',()=>ywScheduleFlush(0));

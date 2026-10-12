@@ -1,6 +1,6 @@
 /* 曆象 v2.4 — compact views and explicit, preserved daily work records. */
 'use strict';
-const Y24_VERSION='2.5.2';
+const Y24_VERSION='2.6.0';
 const Y24_SOURCES=['평가원 모의평가','교육청 학력평가','수능','사설 모의고사'];
 const y24Num=v=>v==null||String(v).trim()===''?null:(Number.isFinite(Number(v))?Number(v):null);
 const y24Fmt=n=>n==null?'—':String(Math.round(n*10)/10);

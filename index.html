@@ -8,24 +8,27 @@
 <meta content="yes" name="apple-mobile-web-app-capable"/>
 <meta content="default" name="apple-mobile-web-app-status-bar-style"/>
 <meta content="曆象" name="apple-mobile-web-app-title"/>
-<link href="./manifest-v200.webmanifest?v=2501" rel="manifest"/>
+<link href="./manifest-v200.webmanifest?v=260" rel="manifest"/>
 <link href="./icon-192.png" rel="apple-touch-icon"/>
-<link href="./styles-v200.css?v=2501" rel="stylesheet"/>
-<link href="./styles-v210.css?v=2501" rel="stylesheet"/>
+<link href="./styles-v200.css?v=260" rel="stylesheet"/>
+<link href="./styles-v210.css?v=260" rel="stylesheet"/>
 <title>曆象 · 수능 만점 운영체제</title>
-<link href="./styles-v240.css?v=2501" rel="stylesheet"/>
-<link href="./styles-v252.css?v=252-e1" rel="stylesheet"/></head>
+<link href="./styles-v240.css?v=260" rel="stylesheet"/>
+<link href="./styles-v252.css?v=260" rel="stylesheet"/><link rel="stylesheet" href="./styles-v260.css?v=260"/>
+</head>
 <body>
 <div class="update-banner hidden" id="updateBanner"><span>새 버전이 준비되었습니다.</span><button class="btn primary small" id="reloadUpdate">새로고침</button></div>
 <div class="app-shell">
 <aside class="sidebar">
 <div class="brand">
 <div aria-label="역상" class="brand-mark">曆</div>
-<div><h1>曆象</h1><span>v2.5.2</span></div>
+<div><h1>曆象</h1><span>v2.6.0</span></div>
 </div>
 <nav aria-label="주 메뉴" id="mainNav">
 <button class="active" data-page="dashboard">오늘</button>
-<button data-page="planner">시간표</button>
+<button data-page="planner">하루</button>
+<button data-page="week">주간</button>
+<button data-page="month">월간</button>
 <button data-page="vending">학습</button>
 <button data-page="tests">시험</button>
 <button data-page="analysis">분석</button>
@@ -118,10 +121,10 @@
 <section class="page" id="planner">
 <article class="card">
 <div class="card-head">
-<div><h3>텐미닛 시간표</h3><div class="micro-label">05:00–01:00 · 10분 · 수면 경계 우선</div><div class="section-links"><button class="text-link" data-go="month">월간</button><button class="text-link" data-go="week">주간</button><button class="text-link" data-go="progress">진도</button></div></div>
+<div><h3>텐미닛 시간표</h3><div class="micro-label">05:00–01:00 · 10분 · 수면 경계 우선</div></div>
 <div class="row">
 <input class="input short" id="plannerDate" type="date"/>
-<button class="btn ghost small" id="plannerModeBtn">편집 모드</button>
+<button class="btn ghost small" id="plannerModeBtn">편집 모드</button><button class="btn ghost small" id="y260PlannerReport">기록 복사</button><button class="btn ghost small" id="y260Today">오늘</button>
 </div>
 </div>
 <div class="schedule-profile-bar">
@@ -179,18 +182,18 @@
 <div>
 <article class="card">
 <div class="card-head">
-<div><h3>학습 자판기</h3><div class="micro-label">인강 · 문제집 · 장바구니 · 진도 연동</div><div class="section-links"><button class="text-link" data-go="progress">진도·종료기준</button><button class="text-link" id="openWaitingInline">대기함</button></div></div>
+<div><h3>학습 자판기</h3><div class="micro-label">인강 · 문제집 · 장바구니 · 진도 연동</div></div>
 <div class="row"><button class="btn ghost small" id="addLectureBtn">+ 인강</button><button class="btn primary small" id="addBookBtn">+ 문제집</button></div>
 </div>
 <input class="input" id="learningSearch" placeholder="강좌·교재·소단원 검색"/>
 <div class="recent-learning" id="recentLearning"></div>
 </article>
 <article class="card" id="lecturePanel">
-<div class="card-head"><h3>인강</h3><label class="inline"><input id="incompleteOnly" type="checkbox"/> 미수강만 보기</label></div>
+<div class="card-head"><h3>인강</h3><input id="incompleteOnly" type="checkbox" hidden/><div class="y260-filter-buttons"><button data-kind="lecture" data-y260-filter="progress">진행</button><button data-kind="lecture" data-y260-filter="complete">완료</button></div></div>
 <div class="lecture-catalog" id="lectureCatalog"></div>
 </article>
 <article class="card" id="bookPanel">
-<div class="card-head"><h3>문제집</h3><span class="badge">문제 수 / 소단원</span></div>
+<div class="card-head"><h3>문제집</h3><div class="y260-filter-buttons"><button data-kind="book" data-y260-filter="progress">진행</button><button data-kind="book" data-y260-filter="complete">완료</button></div><span class="badge">문제 수 / 소단원</span></div>
 <div class="book-catalog" id="bookCatalog"></div>
 </article>
 </div>
@@ -352,7 +355,6 @@
 </section>
 <!-- ANALYSIS -->
 <section class="page" id="analysis">
-<div class="analysis-launcher"><button class="btn ghost small" data-go="month">월간 달력</button><button class="btn ghost small" data-go="week">주간 시간표</button><button class="btn ghost small" data-go="progress">과정 진도</button><button class="btn ghost small" data-go="condition">수면·컨디션</button><button class="btn ghost small" data-go="goals">목표·진단</button></div>
 <article class="card weekly-command-card"><div class="card-head"><div><h3>주간 지휘</h3></div><span class="badge" id="weekCommandLabel"></span></div><div id="weeklyCommand"></div><div class="weekly-priorities"><label>다음 주 핵심 1<input class="input" id="weeklyPriority1" placeholder="가장 중요한 한 가지"/></label><label>핵심 2<input class="input" id="weeklyPriority2"/></label><label>핵심 3<input class="input" id="weeklyPriority3"/></label><label>줄이거나 중단할 자료<input class="input" id="weeklyStop"/></label><button class="btn primary" id="saveWeeklyCommand">주간 판단 저장</button></div></article>
 <article class="card"><div class="card-head"><div><h3>과목별 만점 준비도</h3></div></div><div id="readinessBoard"></div></article>
 <div class="grid g2">
@@ -425,7 +427,7 @@
 <div id="versionInfo"></div>
 </article>
 </section>
-<footer>曆象 · v2.5.2 · Widget LIVE · JS <span id="runtimeStatus">확인 중</span></footer>
+<footer>曆象 · v2.6.0 · Widget LIVE · JS <span id="runtimeStatus">확인 중</span></footer>
 </main>
 </div>
 <!-- TASK MODAL -->
@@ -461,7 +463,7 @@
 <label>실제 공부(분)<input class="input" id="blockActual" min="0" placeholder="자동" type="number"/></label>
 </div>
 <div class="check-row">
-<label><input id="blockSelfStudy" type="checkbox"/> 자습</label>
+<input id="blockSelfStudy" type="checkbox" hidden/>
 <label><input id="blockDevice" type="checkbox"/> 전자기기 가능</label>
 <label><input id="blockLocked" type="checkbox"/> 자동배치 잠금</label>
 </div>
@@ -578,22 +580,23 @@
 </div></div>
 <div aria-labelledby="y21MergeTitle" aria-modal="true" class="modal-back" id="y21MergeModal" role="dialog"><div class="modal"><h3 id="y21MergeTitle">기록 병합</h3><div id="y21MergeBody"></div><div class="y21-modal-actions"><button class="btn ghost modal-close">취소</button><button class="btn primary" id="y21ApplyMerge">선택대로 병합</button></div></div></div>
 <div aria-labelledby="analysisPackageTitle" aria-modal="true" class="modal-back" id="analysisPackageModal" role="dialog"><div class="modal wide"><div class="card-head"><div><h3 id="analysisPackageTitle">오답 분석 패키지</h3><div class="micro-label">원본 기록을 덮어쓰지 않고 증분으로 병합합니다.</div></div><button class="btn ghost small modal-close">닫기</button></div><div id="analysisPackagePreview"></div><div class="row end"><button class="btn ghost modal-close">취소</button><button class="btn primary" id="applyAnalysisPackage">가져오기</button></div></div></div>
-<script defer="" src="./boot-v220.js?v=2501"></script>
-<script defer="" src="./app-v200-core.js?v=252-e1"></script>
-<script defer="" src="./app-v200-engine.js?v=2501"></script>
-<script defer="" src="./app-v200-recovery.js?v=2501"></script>
-<script defer="" src="./app-v210.js?v=2501"></script>
-<script defer="" src="./app-v220-analysis.js?v=2501"></script>
-<script defer="" src="./app-v230.js?v=2501"></script>
-<script defer="" src="./app-v231.js?v=2501"></script>
+
+
+
+
+
+
+
+
 <select aria-hidden="true" hidden="" id="testKind"><option value="single">single</option><option value="full">full</option></select>
 <div class="modal-back" id="y24ExamDetailModal"><div class="modal wide"><div class="card-head"><h3 id="y24ExamTitle"></h3><button class="btn ghost small modal-close">닫기</button></div><div id="y24ExamDetail"></div><div class="row end" id="y24ExamActions"></div></div></div>
 <div class="modal-back" id="y24ActualModal"><div class="modal"><div class="card-head"><h3>공부 실적</h3><button class="btn ghost small modal-close">닫기</button></div><input id="y24WorkId" type="hidden"/><div class="y24-work-plan" id="y24WorkPlan"></div><div class="grid g2"><label>상태<select class="input" id="y24WorkStatus"><option value="complete">완료</option><option value="partial">일부 완료</option><option value="unstarted">미시작</option></select></label><label>실제 시간(분)<input class="input" id="y24ActualMinutes" min="0" step="any" type="number"/></label><label>실제 수량<input class="input" id="y24ActualQty" min="0" step="any" type="number"/></label><label>단위<input class="input" id="y24ActualUnit"/></label></div><label>실제 공부한 범위<input class="input" id="y24ActualRange"/></label><label>메모<textarea class="input" id="y24ActualNote" rows="2"></textarea></label><div class="row end"><button class="btn ghost" id="y24AsPlanned">분량은 계획대로</button><button class="btn primary" id="y24SaveActual">저장</button></div></div></div>
 <div class="modal-back" id="y24ReportModal"><div class="modal wide"><div class="card-head"><h3>오늘 기록</h3><button class="btn ghost small modal-close">닫기</button></div><textarea class="input" id="y24ReportText" readonly="" rows="18"></textarea><div class="row end"><button class="btn primary" id="y24CopyReport">복사</button></div></div></div>
-<script defer="" src="./app-v240.js?v=252-e1"></script>
-<script defer="" src="./app-widget-live.js?v=252-e1"></script>
-<script defer src="./record-safety.js?v=2501"></script>
-<script defer src="./view-tools.js?v=2501"></script>
-<script defer src="./app-v252.js?v=252-e1"></script>
+
+
+
+
+
+<script defer src="./bootstrap-v260.js?v=260"></script>
 </body>
 </html>
